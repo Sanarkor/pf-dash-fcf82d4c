@@ -176,7 +176,7 @@ function lineUsd(sec,l,v){const c=(l.cur||'EUR').toUpperCase();const q=num(l.qty
   if(sec.type!=='cry'&&c==='USD'){const r=fx('USD'); // native USD line: exact $ figures, € alongside for price/PRU
     return {value:isFinite(p)?q*p:(isFinite(pru)?q*pru:0),pnl:isFinite(p)&&isFinite(pru)?q*(p-pru):NaN,cost:isFinite(pru)?q*pru:NaN,alt:[isFinite(p)&&isFinite(r)?'cours '+eur(p*r):null,isFinite(pru)&&isFinite(r)?'PRU '+eur(pru*r):null]};}
   const k=sec.type==='cry'?1:fx(c);
-  return {value:toUsd(v.value),pnl:toUsd(v.pnl),cost:toUsd(v.cost),alt:[isFinite(p)?'cours '+usdS(toUsd(p*k)):null,isFinite(pru)?'PRU '+usdS(toUsd(pru*k)):null]};}
+  return {value:toUsd(v.value),pnl:toUsd(v.pnl),cost:toUsd(v.cost),alt:[isFinite(p)?'cours '+usdS(toUsd(p*k)):null,sec.type!=='cry'&&isFinite(pru)?'PRU '+usdS(toUsd(pru*k)):null]};} // crypto: current price in $ only
 function usdEl(n,signed,extra){const t=signed?sUsd(n):usdS(n);return t&&t!=='—'?el('div',{class:'usd amt'+(extra?' '+extra:''),text:t}):null;}
 function totBlock(v){return el('div',{class:'sec-tot'},el('div',{class:'v amt',text:eur(v.value)}),
   isFinite(v.pnl)?el('div',{class:'pl'},v.cost>0?el('span',{class:'pill amt '+cls(v.pnl),text:pct(v.pnl/v.cost*100)}):null,el('span',{class:'pe amt '+cls(v.pnl),text:signed(v.pnl)})):null,
