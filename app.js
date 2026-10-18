@@ -1,6 +1,8 @@
 'use strict';
 (function(){
 const KEY='pfdash.v1';
+const TOKEN_KEY='pfdash.ghtoken'; // GitHub token: localStorage only, never inside the data
+const REPO='Sanarkor/pf-dash-fcf82d4c',BRANCHES=['main','gh-pages'],DATA_PATH='data.json';
 const SECTIONS=[
   {k:'pea',   name:'PEA',                 type:'sec', color:'#34d399'},
   {k:'cto',   name:'CTO',                 type:'sec', color:'#60a5fa'},
@@ -34,8 +36,10 @@ function normalize(d){
   if(!b.settings.collapsed||typeof b.settings.collapsed!=='object')b.settings.collapsed={};
   if(d.fx&&d.fx.rates)b.fx=d.fx;
   b.cryptoAt=+d.cryptoAt||0;b.stocksAt=+d.stocksAt||0;
+  b.updatedAt=+d.updatedAt||0;b.cloudAt=+d.cloudAt||0;
   return b;
 }
+function touch(){S.updatedAt=Date.now();}
 function save(){try{localStorage.setItem(KEY,JSON.stringify(S));}catch(e){toast('Impossible d\'enregistrer (stockage plein ou bloqué)');}}
 function uid(){return Math.random().toString(36).slice(2,10)+Date.now().toString(36).slice(-4);}
 
@@ -88,7 +92,8 @@ function render(){
   const tpEl=$('#totalPnl');tpEl.className='pnl amt '+(hp?cls(tp):'mut');
   tpEl.textContent=hp?('Plus/moins-value latente : '+signed(tp)+(tc>0?'  ('+pct(tp/tc*100)+')':'')):'Plus/moins-value : renseigne PRU et cours';
   const st=[];st.push('Crypto : '+ago(S.cryptoAt));st.push('Change : '+(S.fx.at?ago(S.fx.at):'—'));
-  st.push('Actions : '+(S.stocksAt?ago(S.stocksAt):'manuel'));$('#status').textContent=st.join(' · ');
+  st.push('Actions : '+(S.stocksAt?ago(S.stocksAt):'manuel'));
+  if(S.cloudAt)st.push(S.updatedAt>S.cloudAt?'En ligne : modifs à sauvegarder':'En ligne : à jour');$('#status').textContent=st.join(' · ');
   drawDonut(parts,total);
   const any=SECTIONS.some(s=>S[s.k].length);$('#empty').classList.toggle('hidden',any);
   const root=$('#sections');root.textContent='';
@@ -158,7 +163,7 @@ function lineRow(sec,l){
   }
   return el('div',{class:'ln'+(sec.type==='sav'&&l.inTotal===false?' off':''),tabindex:'0',role:'button',onclick:()=>{editing[sec.k]=l.id;render();focusFirst(sec.k);},onkeydown:e=>{if(e.key==='Enter'){editing[sec.k]=l.id;render();focusFirst(sec.k);}}},
     el('div',{class:'a'},sec.type==='sav'?el('input',{type:'checkbox',class:'tot-cb',title:'Compte dans le total','aria-label':'Compte dans le total',checked:l.inTotal!==false,
-      onclick:e=>{e.stopPropagation();l.inTotal=e.target.checked;save();render();},onkeydown:e=>e.stopPropagation()}):null,a,...tags),
+      onclick:e=>{e.stopPropagation();l.inTotal=e.target.checked;touch();save();render();},onkeydown:e=>e.stopPropagation()}):null,a,...tags),
     el('div',{class:'r'},el('div',{class:'v amt',text:eur(v.value)})),
     el('div',{class:'b amt',text:b}),
     el('div',{class:'r'},isFinite(v.pnl)?el('div',{class:'p amt '+cls(v.pnl),text:signed(v.pnl)+(v.cost>0?' '+pct(v.pnl/v.cost*100):'')}):el('div',{class:'p',text:''})));
@@ -188,7 +193,7 @@ function editForm(sec,l){
       inp('mkt','Place onvista (facultatif)',l.mkt,{ph:'_PAR, _NYS, _NAS…'}));
   }
   const btns=el('div',{class:'btns'});
-  if(!isNew)btns.append(el('button',{type:'button',class:'danger',onclick:async()=>{if(await ask('Supprimer cette ligne ?',{ok:'Supprimer',danger:1})){S[sec.k]=S[sec.k].filter(x=>x.id!==l.id);delete editing[sec.k];save();render();}}},'Supprimer'));
+  if(!isNew)btns.append(el('button',{type:'button',class:'danger',onclick:async()=>{if(await ask('Supprimer cette ligne ?',{ok:'Supprimer',danger:1})){S[sec.k]=S[sec.k].filter(x=>x.id!==l.id);delete editing[sec.k];touch();save();render();}}},'Supprimer'));
   btns.append(el('button',{type:'button',onclick:()=>{delete editing[sec.k];render();}},'Annuler'),el('button',{type:'submit',class:'primary'},'Enregistrer'));
   f.append(btns);
   f.addEventListener('keydown',e=>{if(e.key==='Escape'){delete editing[sec.k];render();}});
@@ -209,7 +214,7 @@ function commit(sec,id,fd,form){
     if(sec.type==='cry'&&o.sym!==ex.sym&&!g('cgId'))o.cgId='';
     Object.assign(ex,o);
   }else{o.id=uid();if(sec.type!=='sav'&&o.price!==null){o.priceAt=Date.now();o.priceSrc='manuel';}arr.push(o);}
-  delete editing[sec.k];save();render();
+  delete editing[sec.k];touch();save();render();
   if(sec.type==='cry'&&(!ex||o.price===null||!o.cgId))refreshCrypto(true);
 }
 
@@ -307,7 +312,7 @@ function exportJSON(){
   document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove();},500);toast('Export téléchargé');
 }
 function isData(d){return d&&typeof d==='object'&&(SECTIONS.some(s=>Array.isArray(d[s.k]))||LEGACY_SAV.some(x=>Array.isArray(d[x[0]])));}
-function applyImport(d){const keepKey=S.settings.apiKey,keepCol=S.settings.collapsed,keepMask=S.settings.masked;S=normalize(d);S.settings.collapsed=keepCol;S.settings.masked=keepMask;if(!S.settings.apiKey&&keepKey)S.settings.apiKey=keepKey;save();render();refreshAll(false);}
+function applyImport(d){const keepKey=S.settings.apiKey,keepCol=S.settings.collapsed,keepMask=S.settings.masked;S=normalize(d);S.settings.collapsed=keepCol;S.settings.masked=keepMask;if(!S.settings.apiKey&&keepKey)S.settings.apiKey=keepKey;S.cloudAt=0;touch();save();render();refreshAll(false);}
 /* in-page modal (window.confirm can be blocked in webviews) */
 function ask(msg,opts={}){return new Promise(res=>{
   const prev=document.querySelector('.modal-bg');if(prev)prev.remove();
@@ -353,24 +358,93 @@ function importJSON(file){
     applyImport(d);toast('Import réussi');};r.readAsText(file);
 }
 
+
+/* ---------- online copy (data.json in the repo) ---------- */
+function cleanForCloud(){ // never publish the API key, the GitHub token or local UI state
+  const o=JSON.parse(JSON.stringify(S));
+  o.settings={provider:o.settings.provider||'none'};
+  delete o.cloudAt;o.app='pf-dash';o.demo=false;return o;
+}
+function applyRemote(d){ // keep this browser's settings (API key, provider, masked, collapsed)
+  const st=S.settings;S=normalize(d);
+  if(st.provider&&st.provider!=='none'||st.apiKey)S.settings=st;
+  else S.settings=Object.assign({},S.settings,{apiKey:'',collapsed:st.collapsed||{},masked:!!st.masked});
+  delete S.settings.token;
+  S.updatedAt=+d.updatedAt||0;S.cloudAt=S.updatedAt;save();render();refreshAll(false);
+}
+async function fetchRemote(fresh){
+  if(fresh){ // GitHub API: freshest copy (no CDN cache)
+    try{const r=await fetch('https://api.github.com/repos/'+REPO+'/contents/'+DATA_PATH+'?ref=gh-pages&t='+Date.now(),
+      {cache:'no-store',credentials:'omit',headers:{Accept:'application/vnd.github.raw+json'}});
+      if(r.ok){const d=await r.json();if(isData(d))return d;}}catch(e){}
+  }
+  try{const r=await fetch(DATA_PATH+'?t='+Date.now(),{cache:'no-store',credentials:'omit'});if(!r.ok)return null;const d=await r.json();return isData(d)?d:null;}
+  catch(e){return null;}
+}
+async function syncFromRemote(){
+  if(location.hash.indexOf('#import=')===0)return;
+  const d=await fetchRemote(false);if(!d)return;
+  const ru=+d.updatedAt||0;const has=SECTIONS.some(s=>S[s.k].length);
+  if(!has||S.demo){applyRemote(d);toast('Données en ligne chargées');return;}
+  if(ru<=(S.updatedAt||0))return;
+  if(S.updatedAt&&S.cloudAt&&S.updatedAt<=S.cloudAt){applyRemote(d);toast('Sauvegarde en ligne plus récente chargée');return;}
+  if(await ask('Une sauvegarde en ligne plus récente existe. La charger ?',{ok:'Charger',
+    sub:'Sauvegarde en ligne du '+new Date(ru).toLocaleString('fr-FR')+'. Les données de ce navigateur seront remplacées (Annuler pour les garder, puis « Sauvegarder en ligne »).'})){applyRemote(d);toast('Sauvegarde en ligne chargée');}
+}
+function b64utf8(s){const by=new TextEncoder().encode(s);let bin='';for(let i=0;i<by.length;i+=0x8000)bin+=String.fromCharCode.apply(null,by.subarray(i,i+0x8000));return btoa(bin);}
+async function ghPut(branch,content,token,msg){
+  const url='https://api.github.com/repos/'+REPO+'/contents/'+DATA_PATH;
+  const h={Accept:'application/vnd.github+json',Authorization:'Bearer '+token,'X-GitHub-Api-Version':'2022-11-28'};
+  let sha;const g=await fetch(url+'?ref='+encodeURIComponent(branch)+'&t='+Date.now(),{headers:h,cache:'no-store',credentials:'omit'});
+  if(g.ok)sha=(await g.json()).sha;else if(g.status!==404)throw new Error(branch+' : HTTP '+g.status);
+  const body={message:msg,content,branch};if(sha)body.sha=sha;
+  const p=await fetch(url,{method:'PUT',headers:Object.assign({'Content-Type':'application/json'},h),body:JSON.stringify(body),credentials:'omit'});
+  if(!p.ok)throw new Error(branch+' : HTTP '+p.status);
+}
+let cloudBusy=false;
+async function saveOnline(){
+  const token=(localStorage.getItem(TOKEN_KEY)||'').trim();
+  if(!token){toast('Colle d\'abord ton jeton GitHub dans ⚙ Réglages');return;}
+  if(S.demo){toast('Impossible : ce sont les données de démo');return;}
+  if(cloudBusy)return;
+  if(!await ask('Publier tes données en ligne ?',{ok:'☁️ Sauvegarder',sub:'Le fichier data.json du dépôt (public) sera remplacé par les données de ce navigateur. La clé API et le jeton ne sont jamais envoyés.'}))return;
+  cloudBusy=true;toast('Sauvegarde en ligne…');
+  try{
+    const now=Date.now();const o=cleanForCloud();o.updatedAt=now;o.savedAt=new Date(now).toISOString();
+    const content=b64utf8(JSON.stringify(o,null,1));
+    for(const br of BRANCHES)await ghPut(br,content,token,'Sauvegarde des données ('+new Date(now).toLocaleString('fr-FR')+')');
+    S.updatedAt=now;S.cloudAt=now;save();render();toast('☁️ Sauvegardé en ligne (visible partout d\'ici 1 à 2 min)');
+  }catch(e){toast('Échec de la sauvegarde ('+e.message+'). Vérifie le jeton.');}
+  finally{cloudBusy=false;}
+}
+async function loadOnline(){
+  const d=await fetchRemote(true);if(!d){toast('Aucune sauvegarde en ligne trouvée');return;}
+  const n=SECTIONS.reduce((a,s)=>a+(Array.isArray(d[s.k])?d[s.k].length:0),0);
+  if(!await ask('Charger la sauvegarde en ligne ?',{ok:'Charger',sub:n+' ligne(s), sauvegarde du '+(d.updatedAt?new Date(+d.updatedAt).toLocaleString('fr-FR'):'?')+'. Les données de ce navigateur seront remplacées.'}))return;
+  applyRemote(d);toast('Sauvegarde en ligne chargée');
+}
+
 /* ---------- wire ---------- */
 $('#btnRefresh').onclick=()=>refreshAll(true);
 $('#btnMask').onclick=()=>{S.settings.masked=!S.settings.masked;save();render();};
 const dlg=$('#dlgSettings');
 function closeDlg(){if(!dlg.open)return;if(dlg.close)dlg.close();else{dlg.removeAttribute('open');dlg.dispatchEvent(new Event('close'));}}
-$('#btnSettings').onclick=()=>{$('#setProvider').value=S.settings.provider||'none';$('#setKey').value=S.settings.apiKey||'';if(dlg.showModal)dlg.showModal();else dlg.setAttribute('open','');};
+$('#btnSettings').onclick=()=>{$('#setProvider').value=S.settings.provider||'none';$('#setKey').value=S.settings.apiKey||'';$('#setToken').value=localStorage.getItem(TOKEN_KEY)||'';if(dlg.showModal)dlg.showModal();else dlg.setAttribute('open','');};
 $('#btnPaste').onclick=()=>{const t=$('#pasteImport').value;if(!t.trim()){toast('Colle d\'abord le lien ou le JSON');return;}$('#pasteImport').value='';closeDlg();importFromText(t,false);};
 $('#btnCloseDlg').onclick=e=>{e.preventDefault();closeDlg();};
-dlg.addEventListener('close',()=>{const p=$('#setProvider').value,k=$('#setKey').value.trim();const ch=p!==S.settings.provider||k!==S.settings.apiKey;
+dlg.addEventListener('close',()=>{const tk=$('#setToken').value.trim();try{if(tk)localStorage.setItem(TOKEN_KEY,tk);else localStorage.removeItem(TOKEN_KEY);}catch(e){}
+  const p=$('#setProvider').value,k=$('#setKey').value.trim();const ch=p!==S.settings.provider||k!==S.settings.apiKey;
   S.settings.provider=p;S.settings.apiKey=k;save();render();if(ch&&p!=='none'&&k)refreshAll(true);});
 $('#btnExport').onclick=exportJSON;
+$('#btnCloudSave').onclick=()=>{$('#setToken').value&&localStorage.setItem(TOKEN_KEY,$('#setToken').value.trim());closeDlg();saveOnline();};
+$('#btnCloudLoad').onclick=()=>{closeDlg();loadOnline();};
 $('#btnImport').onclick=()=>$('#fileImport').click();
 $('#fileImport').onchange=e=>{const f=e.target.files[0];if(f)importJSON(f);e.target.value='';closeDlg();};
 const loadDemo=async()=>{const has=SECTIONS.some(s=>S[s.k].length)&&!S.demo;if(dlg.open)closeDlg();if(has&&!await ask('Remplacer tes données par la démo ?',{ok:'Charger la démo',sub:'Pense à exporter avant.'}))return;S=demo();save();render();refreshAll(false);};
 $('#btnDemo').onclick=loadDemo;$('#btnDemo2').onclick=loadDemo;
 $('#btnReset').onclick=async()=>{closeDlg();if(!await ask('Effacer toutes les données de ce navigateur ?',{ok:'Tout effacer',danger:1}))return;const st=S.settings;S=blank();S.settings.provider=st.provider;S.settings.apiKey=st.apiKey;save();render();toast('Données effacées');};
 $('#btnClearDemo').onclick=()=>{const st=S.settings;S=blank();S.settings.provider=st.provider;S.settings.apiKey=st.apiKey;save();render();};
-render();hashImport();refreshAll(false);
+render();hashImport();syncFromRemote().finally(()=>refreshAll(false));
 window.addEventListener('hashchange',hashImport);
 window.addEventListener('pageshow',hashImport);
 window.addEventListener('focus',hashImport);
