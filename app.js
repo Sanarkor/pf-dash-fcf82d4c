@@ -19,8 +19,10 @@ const CURS=['EUR','USD','GBP','CHF','CAD','JPY'];
 /* ---------- state ---------- */
 // legacy (v1) savings sections -> merged 'savings' (v2)
 const LEGACY_SAV=[['savRev','',true],['savLbp','La Banque Postale',true],['spouse','Ma femme',false],['kids','Enfant',false]];
+const CASH_SECS=['pea','cto','crypto'];
+function blankCash(){return {pea:{amount:0,cur:'EUR'},cto:{amount:0,cur:'EUR'},crypto:{amount:0,cur:'EUR'}};}
 function blank(){return {v:2,demo:false,pea:[],cto:[],savings:[],crypto:[],
-  settings:{provider:'none',apiKey:'',masked:false,collapsed:{}},fx:{rates:{EUR:1},at:0,src:''},cryptoAt:0,stocksAt:0};}
+  cash:blankCash(),settings:{provider:'none',apiKey:'',masked:false,collapsed:{}},fx:{rates:{EUR:1},at:0,src:''},cryptoAt:0,stocksAt:0};}
 let S=load();
 function load(){
   try{const raw=localStorage.getItem(KEY);if(!raw)return blank();return normalize(JSON.parse(raw));}catch(e){return blank();}
@@ -31,6 +33,8 @@ function normalize(d){
   for(const[k,inst,inTotal]of LEGACY_SAV){if(Array.isArray(d[k]))for(const x of d[k]){if(!x||typeof x!=='object')continue;
     b.savings.push(Object.assign({id:uid(),inst,inTotal},x,{inTotal:x.inTotal===undefined?inTotal:!!x.inTotal,inst:x.inst||inst}));}}
   for(const x of b.savings){if(x.inTotal===undefined)x.inTotal=true;x.inTotal=!!x.inTotal;}
+  if(d.cash&&typeof d.cash==='object')for(const k of CASH_SECS){const c=d.cash[k];if(c&&typeof c==='object'){const n=typeof c.amount==='number'?c.amount:parseFloat(String(c.amount??'').replace(/\s/g,'').replace(',','.'));
+    b.cash[k]={amount:isFinite(n)?n:0,cur:(k==='cto'&&String(c.cur).toUpperCase()==='USD')?'USD':'EUR'};}}
   b.demo=!!d.demo;
   if(d.settings&&typeof d.settings==='object')Object.assign(b.settings,d.settings);
   if(!b.settings.collapsed||typeof b.settings.collapsed!=='object')b.settings.collapsed={};
@@ -79,7 +83,10 @@ function lineVal(sec,l){
 }
 function secVal(sec){let value=0,cost=0,pnl=0,hasPnl=false,off=0,offN=0;for(const l of S[sec.k]){const v=lineVal(sec,l);
   if(sec.type==='sav'&&l.inTotal===false){off+=v.value;offN++;continue;}value+=v.value;
-  if(isFinite(v.pnl)){pnl+=v.pnl;cost+=v.cost;hasPnl=true;}}return {value,cost,pnl:hasPnl?pnl:NaN,off,offN};}
+  if(isFinite(v.pnl)){pnl+=v.pnl;cost+=v.cost;hasPnl=true;}}
+  const cash=cashVal(sec.k);value+=cash; // cash: in totals, never in gain/loss
+  return {value,cost,pnl:hasPnl?pnl:NaN,off,offN,cash};}
+function cashVal(k){const c=S.cash&&S.cash[k];if(!c)return 0;const n=num(c.amount);if(!isFinite(n)||!n)return 0;const r=fx(c.cur);return isFinite(r)?n*r:0;}
 
 /* ---------- render ---------- */
 const editing={}; // sectionKey -> line id | 'new'
@@ -141,9 +148,29 @@ function renderSection(sec){
     rows=[];}
   for(const l of rows){list.appendChild(editing[sec.k]===l.id?editForm(sec,l):lineRow(sec,l));}
   if(editing[sec.k]==='new')list.appendChild(editForm(sec,null));
+  if(CASH_SECS.includes(sec.k))list.appendChild(editing[sec.k]==='cash'?cashForm(sec):cashRow(sec));
   body.appendChild(list);
   if(editing[sec.k]!=='new')body.appendChild(el('button',{class:'add',onclick:()=>{editing[sec.k]='new';render();focusFirst(sec.k);}},'+ Ajouter '+(sec.type==='sav'?'un compte':sec.type==='cry'?'une crypto':'une ligne')));
   card.appendChild(body);return card;
+}
+function cashRow(sec){
+  const c=S.cash[sec.k];const n=num(c.amount)||0;const v=cashVal(sec.k);const usd=c.cur==='USD';
+  const open=()=>{editing[sec.k]='cash';render();focusFirst(sec.k);};
+  return el('div',{class:'ln cash',tabindex:'0',role:'button',title:'Modifier les fonds disponibles',onclick:open,onkeydown:e=>{if(e.key==='Enter')open();}},
+    el('div',{class:'a'},el('span',{class:'wal','aria-hidden':'true'},'👛'),el('span',{class:'ct'},'Fonds disponibles non investis')),
+    el('div',{class:'r'},el('div',{class:'v amt',text:eur(v)})),
+    el('div',{class:'b amt',text:(usd?money(n,'USD')+' · ':'')+'Liquidités · hors plus/moins-value'}),
+    el('div',{class:'r'}));
+}
+function cashForm(sec){
+  const c=S.cash[sec.k];
+  const f=el('form',{class:'edit cash-edit',onsubmit:e=>{e.preventDefault();const fd=new FormData(f);const n=num((fd.get('amount')||'').toString().trim());
+    S.cash[sec.k]={amount:isFinite(n)?n:0,cur:sec.k==='cto'&&fd.get('cur')==='USD'?'USD':'EUR'};delete editing[sec.k];touch();save();render();}});
+  f.append(inp('amount','Fonds disponibles non investis'+(sec.k==='cto'?'':' (€)'),c.amount||'',{num:1,ph:'0'}));
+  if(sec.k==='cto'){const s=el('select',{name:'cur'},...['EUR','USD'].map(x=>{const o=el('option',{value:x,text:x});if(c.cur===x)o.selected=true;return o;}));f.append(el('label',null,'Devise',s));}
+  f.append(el('div',{class:'btns'},el('button',{type:'button',onclick:()=>{delete editing[sec.k];render();}},'Annuler'),el('button',{type:'submit',class:'primary'},'Enregistrer')));
+  f.addEventListener('keydown',e=>{if(e.key==='Escape'){delete editing[sec.k];render();}});
+  return f;
 }
 function isCollapsed(k){const c=S.settings.collapsed[k];return c===undefined?k==='savings':!!c;}
 function focusFirst(k){setTimeout(()=>{const i=document.querySelector('#sec-'+k+' .edit input');if(i)i.focus();},30);}
@@ -327,6 +354,7 @@ function demo(){
     {id:uid(),label:'Démo Livret',inst:'Banque Démo B',amount:5000,rate:1.5,capped:false,note:'',inTotal:true},
     {id:uid(),label:'Démo Livret plafonné',inst:'Banque Démo B',amount:10000,rate:1.5,capped:true,note:'Démo',inTotal:true},
     {id:uid(),label:'Démo Livret enfant',inst:'Enfant A',amount:800,note:'',inTotal:false}];
+  d.cash={pea:{amount:150,cur:'EUR'},cto:{amount:200,cur:'USD'},crypto:{amount:50,cur:'EUR'}};
   d.crypto=[{id:uid(),sym:'BTC',qty:0.01,pru:50000,cgId:'bitcoin'},{id:uid(),sym:'ETH',qty:0.2,pru:2000,cgId:'ethereum'}];
   return d;
 }
