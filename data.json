@@ -16,7 +16,7 @@
    "src": "auto",
    "ovType": "STOCK",
    "chg": -0.5796,
-   "priceAt": 1792321009782,
+   "priceAt": 1792321309662,
    "priceSrc": "auto",
    "via": "onvista Paris",
    "autoFail": false
@@ -35,7 +35,7 @@
    "src": "auto",
    "ovType": "FUND",
    "chg": -0.1419,
-   "priceAt": 1792321009782,
+   "priceAt": 1792321309662,
    "priceSrc": "auto",
    "via": "onvista Paris",
    "autoFail": false
@@ -54,7 +54,7 @@
    "src": "auto",
    "ovType": "FUND",
    "chg": -1.0484,
-   "priceAt": 1792321009782,
+   "priceAt": 1792321309662,
    "priceSrc": "auto",
    "via": "onvista Paris",
    "autoFail": false
@@ -73,7 +73,7 @@
    "src": "auto",
    "ovType": "FUND",
    "chg": -0.1379,
-   "priceAt": 1792321009782,
+   "priceAt": 1792321309662,
    "priceSrc": "auto",
    "via": "onvista Paris",
    "autoFail": false
@@ -92,7 +92,7 @@
    "src": "auto",
    "ovType": "FUND",
    "chg": -1.1449,
-   "priceAt": 1792321009782,
+   "priceAt": 1792321309662,
    "priceSrc": "auto",
    "via": "onvista Paris",
    "autoFail": false
@@ -113,7 +113,7 @@
    "src": "auto",
    "ovType": "STOCK",
    "chg": -8.9374,
-   "priceAt": 1792321008478,
+   "priceAt": 1792321341420,
    "priceSrc": "auto",
    "via": "Twelve Data",
    "autoFail": false
@@ -132,7 +132,7 @@
    "src": "auto",
    "ovType": "STOCK",
    "chg": -1.7427,
-   "priceAt": 1792320700279,
+   "priceAt": 1792321309662,
    "priceSrc": "auto",
    "via": "Twelve Data",
    "autoFail": false
@@ -204,81 +204,82 @@
   {
    "id": "2bz82qbhx5uf",
    "sym": "BTC",
-   "qty": 0.026,
-   "pru": null,
+   "qty": 0.02726735,
+   "pru": 64706.2,
    "cgId": "bitcoin",
-   "price": 73018,
-   "priceAt": 1792321009782,
+   "price": 72987,
+   "priceAt": 1792321309662,
    "priceSrc": "auto"
   },
   {
    "id": "i0i8wnan7qe1",
    "sym": "ETH",
-   "qty": 0.34,
-   "pru": null,
+   "qty": 0.34031479,
+   "pru": 1825.78,
    "cgId": "ethereum",
-   "price": 2152.04,
-   "priceAt": 1792321009782,
+   "price": 2150.39,
+   "priceAt": 1792321309662,
    "priceSrc": "auto"
   },
   {
    "id": "ezbdigdc61wn",
    "sym": "DOGE",
-   "qty": 2139.89,
-   "pru": null,
+   "qty": 2139.8918,
+   "pru": 0.07773,
    "cgId": "dogecoin",
-   "price": 0.070612,
-   "priceAt": 1792321009782,
+   "price": 0.070574,
+   "priceAt": 1792321309662,
    "priceSrc": "auto"
   },
   {
    "id": "5f56ekyst60c",
    "sym": "SOL",
-   "qty": 1.35,
-   "pru": null,
+   "qty": 1.746454,
+   "pru": 80.73,
    "cgId": "solana",
-   "price": 92.5,
-   "priceAt": 1792321009782,
+   "price": 92.46,
+   "priceAt": 1792321309662,
    "priceSrc": "auto"
   },
   {
    "id": "qjtykly7vnma",
    "sym": "HYPE",
-   "qty": 0.96,
-   "pru": null,
+   "qty": 0.96654671,
+   "pru": 64.69,
    "cgId": "hyperliquid",
-   "price": 70.27,
-   "priceAt": 1792321009782,
+   "price": 70.24,
+   "priceAt": 1792321309662,
    "priceSrc": "auto"
   },
   {
    "id": "xfvvvlwyhi8t",
-   "sym": "ATH",
-   "qty": 7896.8,
-   "pru": null,
-   "cgId": "aethir",
-   "price": 0.00484923,
-   "priceAt": 1792321009782,
-   "priceSrc": "auto"
+   "sym": "ZRO",
+   "qty": 16.21168,
+   "pru": 2.1253,
+   "cgId": "layerzero",
+   "price": 1.64,
+   "priceAt": 1792321309662,
+   "priceSrc": "auto",
+   "chg": null
   },
   {
    "id": "unh3p4wznwtz",
    "sym": "TON",
-   "qty": 8.76,
-   "pru": null,
+   "qty": 8.76254219,
+   "pru": 1.3694,
    "cgId": "the-open-network",
    "price": 1.2,
-   "priceAt": 1792321009782,
+   "priceAt": 1792321309662,
    "priceSrc": "auto"
   },
   {
    "id": "cok17kr925mp",
    "sym": "DOGS",
    "qty": 209970,
-   "pru": null,
+   "pru": 0.0000413665,
    "cgId": "dogs-2",
-   "price": 0.00003401,
-   "priceAt": 1792321009782,
+   "price": 0.000034,
+   "priceAt": 1792321309662,
    "priceSrc": "auto"
   }
  ],
@@ -290,12 +291,12 @@
    "EUR": 1,
    "USD": 0.888651915044877
   },
-  "at": 1792321009781,
+  "at": 1792321309659,
   "src": "frankfurter (2026-10-16)"
  },
- "cryptoAt": 1792321009782,
- "stocksAt": 1792321009782,
- "updatedAt": 1792321196684,
+ "cryptoAt": 1792321309662,
+ "stocksAt": 1792321341635,
+ "updatedAt": 1792321362907,
  "app": "pf-dash",
- "savedAt": "2026-10-18T10:59:56.684Z"
+ "savedAt": "2026-10-18T11:02:42.907Z"
 }
