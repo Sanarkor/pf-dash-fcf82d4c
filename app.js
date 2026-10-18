@@ -3,12 +3,9 @@
 const KEY='pfdash.v1';
 const SECTIONS=[
   {k:'pea',   name:'PEA',                 type:'sec', color:'#34d399'},
-  {k:'cto',   name:'CTO (Revolut)',       type:'sec', color:'#60a5fa'},
-  {k:'savRev',name:'Épargne Revolut',     type:'sav', color:'#a78bfa'},
-  {k:'savLbp',name:'Épargne La Banque Postale', type:'sav', color:'#fbbf24'},
-  {k:'crypto',name:'Crypto',              type:'cry', color:'#f472b6'},
-  {k:'kids',  name:'Comptes enfants',     type:'sav', color:'#22d3ee', excluded:true},
-  {k:'spouse',name:'Ma femme',            type:'sav', color:'#fb923c', excluded:true}
+  {k:'cto',   name:'CTO',                 type:'sec', color:'#60a5fa'},
+  {k:'savings',name:'Épargne',            type:'sav', color:'#fbbf24'},
+  {k:'crypto',name:'Crypto',              type:'cry', color:'#f472b6'}
 ];
 const CG_MAP={BTC:'bitcoin',ETH:'ethereum',DOGE:'dogecoin',SOL:'solana',HYPE:'hyperliquid',ATH:'aethir',TON:'the-open-network',DOGS:'dogs-2',
   XRP:'ripple',BNB:'binancecoin',ADA:'cardano',USDT:'tether',USDC:'usd-coin',DOT:'polkadot',AVAX:'avalanche-2',LINK:'chainlink',PEPE:'pepe',
@@ -18,7 +15,9 @@ const CG_MAP={BTC:'bitcoin',ETH:'ethereum',DOGE:'dogecoin',SOL:'solana',HYPE:'hy
 const CURS=['EUR','USD','GBP','CHF','CAD','JPY'];
 
 /* ---------- state ---------- */
-function blank(){return {v:1,demo:false,pea:[],cto:[],savRev:[],savLbp:[],crypto:[],kids:[],spouse:[],
+// legacy (v1) savings sections -> merged 'savings' (v2)
+const LEGACY_SAV=[['savRev','',true],['savLbp','La Banque Postale',true],['spouse','Ma femme',false],['kids','Enfant',false]];
+function blank(){return {v:2,demo:false,pea:[],cto:[],savings:[],crypto:[],
   settings:{provider:'none',apiKey:'',masked:false,collapsed:{}},fx:{rates:{EUR:1},at:0,src:''},cryptoAt:0,stocksAt:0};}
 let S=load();
 function load(){
@@ -27,6 +26,9 @@ function load(){
 function normalize(d){
   const b=blank();if(!d||typeof d!=='object')return b;
   for(const s of SECTIONS){b[s.k]=Array.isArray(d[s.k])?d[s.k].filter(x=>x&&typeof x==='object').map(x=>Object.assign({id:uid()},x)):[];}
+  for(const[k,inst,inTotal]of LEGACY_SAV){if(Array.isArray(d[k]))for(const x of d[k]){if(!x||typeof x!=='object')continue;
+    b.savings.push(Object.assign({id:uid(),inst,inTotal},x,{inTotal:x.inTotal===undefined?inTotal:!!x.inTotal,inst:x.inst||inst}));}}
+  for(const x of b.savings){if(x.inTotal===undefined)x.inTotal=true;x.inTotal=!!x.inTotal;}
   b.demo=!!d.demo;
   if(d.settings&&typeof d.settings==='object')Object.assign(b.settings,d.settings);
   if(!b.settings.collapsed||typeof b.settings.collapsed!=='object')b.settings.collapsed={};
@@ -71,8 +73,9 @@ function lineVal(sec,l){
   const value=isFinite(p)?q*p*r:(isFinite(cost)?cost:0);
   return {value,cost,pnl:isFinite(p)&&isFinite(cost)?value-cost:NaN,missing:!isFinite(p),fxMissing:!isFinite(r)};
 }
-function secVal(sec){let value=0,cost=0,pnl=0,hasPnl=false;for(const l of S[sec.k]){const v=lineVal(sec,l);value+=v.value;
-  if(isFinite(v.pnl)){pnl+=v.pnl;cost+=v.cost;hasPnl=true;}}return {value,cost,pnl:hasPnl?pnl:NaN};}
+function secVal(sec){let value=0,cost=0,pnl=0,hasPnl=false,off=0,offN=0;for(const l of S[sec.k]){const v=lineVal(sec,l);
+  if(sec.type==='sav'&&l.inTotal===false){off+=v.value;offN++;continue;}value+=v.value;
+  if(isFinite(v.pnl)){pnl+=v.pnl;cost+=v.cost;hasPnl=true;}}return {value,cost,pnl:hasPnl?pnl:NaN,off,offN};}
 
 /* ---------- render ---------- */
 const editing={}; // sectionKey -> line id | 'new'
@@ -80,7 +83,7 @@ function render(){
   document.body.classList.toggle('masked',!!S.settings.masked);
   $('#demoBanner').classList.toggle('hidden',!S.demo);
   let total=0,tp=0,tc=0,hp=false;const parts=[];
-  for(const sec of SECTIONS){if(sec.excluded)continue;const v=secVal(sec);total+=v.value;if(isFinite(v.pnl)){tp+=v.pnl;tc+=v.cost;hp=true;}parts.push({sec,v:v.value});}
+  for(const sec of SECTIONS){const v=secVal(sec);total+=v.value;if(isFinite(v.pnl)){tp+=v.pnl;tc+=v.cost;hp=true;}parts.push({sec,v:v.value});}
   $('#total').textContent=eur(total);
   const tpEl=$('#totalPnl');tpEl.className='pnl amt '+(hp?cls(tp):'mut');
   tpEl.textContent=hp?('Plus/moins-value latente : '+signed(tp)+(tc>0?'  ('+pct(tp/tc*100)+')':'')):'Plus/moins-value : renseigne PRU et cours';
@@ -103,17 +106,18 @@ function drawDonut(parts,total){
   const lg=$('#legend');lg.textContent='';
   for(const p of parts){const li=el('li',null,el('span',{class:'dot'}),el('span',{class:'nm',text:p.sec.name}),el('span',{class:'pc',text:total>0?(p.v/total*100).toFixed(1).replace('.',',')+' %':'—'}),el('span',{class:'vl amt',text:eur(p.v)}));
     li.style.setProperty('--c',p.sec.color);lg.appendChild(li);}
-  for(const sec of SECTIONS){if(!sec.excluded||!S[sec.k].length)continue;const kv=secVal(sec).value;
-    const li=el('li',{class:'mut'},el('span',{class:'dot'}),el('span',{class:'nm',text:sec.name+' (hors total)'}),el('span',{class:'pc',text:''}),el('span',{class:'vl amt',text:eur(kv)}));li.style.setProperty('--c',sec.color);lg.appendChild(li);}
+  for(const sec of SECTIONS){const v=secVal(sec);if(!v.offN)continue;
+    const li=el('li',{class:'mut off'},el('span',{class:'dot'}),el('span',{class:'nm',text:sec.name+' hors total'}),el('span',{class:'pc',text:''}),el('span',{class:'vl amt',text:eur(v.off)}));li.style.setProperty('--c','#64748b');lg.appendChild(li);}
 }
 function renderSection(sec){
   const v=secVal(sec);const collapsed=!!S.settings.collapsed[sec.k];
   const card=el('section',{class:'card sec'+(collapsed?' collapsed':''),id:'sec-'+sec.k});card.style.setProperty('--c',sec.color);
-  const sub=sec.excluded?'Hors total · '+S[sec.k].length+' compte(s)':S[sec.k].length+' ligne(s)';
+  const sub=S[sec.k].length+(sec.type==='sav'?' compte(s)':' ligne(s)');
   const head=el('div',{class:'sec-head',onclick:()=>{S.settings.collapsed[sec.k]=!collapsed;save();render();}},
     el('div',{class:'sec-title'},el('span',{class:'bar'}),el('div',null,el('div',{text:(collapsed?'▸ ':'▾ ')+sec.name}),el('div',{class:'sec-sub',text:sub}))),
     el('div',{class:'sec-tot'},el('div',{class:'v amt',text:eur(v.value)}),
-      isFinite(v.pnl)?el('div',{class:'p amt '+cls(v.pnl),text:signed(v.pnl)+(v.cost>0?' ('+pct(v.pnl/v.cost*100)+')':'')}):null));
+      isFinite(v.pnl)?el('div',{class:'p amt '+cls(v.pnl),text:signed(v.pnl)+(v.cost>0?' ('+pct(v.pnl/v.cost*100)+')':'')}):null,
+      v.offN?el('div',{class:'p mut amt',text:'+ '+eur(v.off)+' hors total'}):null));
   card.appendChild(head);
   const body=el('div',{class:'sec-body'});const list=el('div',{class:'lines'});
   for(const l of S[sec.k]){list.appendChild(editing[sec.k]===l.id?editForm(sec,l):lineRow(sec,l));}
@@ -126,8 +130,9 @@ function focusFirst(k){setTimeout(()=>{const i=document.querySelector('#sec-'+k+
 function lineRow(sec,l){
   const v=lineVal(sec,l);let a,b,tags=[];
   if(sec.type==='sav'){
-    a=l.label||'Compte';const bits=[];if(isFinite(num(l.rate)))bits.push('Taux '+String(num(l.rate)).replace('.',',')+' %');if(l.note)bits.push(l.note);b=bits.join(' · ')||'Solde manuel';
+    a=l.label||'Compte';const bits=[];if(l.inst)bits.push(l.inst);if(isFinite(num(l.rate)))bits.push('Taux '+String(num(l.rate)).replace('.',',')+' %');if(l.note)bits.push(l.note);b=bits.join(' · ')||'Solde manuel';
     if(l.capped)tags.push(el('span',{class:'tag ok',text:'Plafond atteint'}));
+    if(l.inTotal===false)tags.push(el('span',{class:'tag off',text:'hors total'}));
   }else if(sec.type==='cry'){
     a=(l.sym||'?').toUpperCase();const bits=[qtyf(num(l.qty))+' '+(l.sym||'').toUpperCase()];
     if(isFinite(num(l.price)))bits.push(money(num(l.price),'EUR'));if(isFinite(num(l.pru)))bits.push('PRU '+money(num(l.pru),'EUR'));b=bits.join(' · ');
@@ -138,7 +143,7 @@ function lineRow(sec,l){
     if(l.priceAt)bits.push((l.priceSrc==='auto'?'auto ':'saisi ')+ago(l.priceAt));b=bits.join(' · ');
     if(v.missing)tags.push(el('span',{class:'tag',text:'cours manquant'}));if(v.fxMissing)tags.push(el('span',{class:'tag',text:'change ?'}));
   }
-  return el('div',{class:'ln',tabindex:'0',role:'button',onclick:()=>{editing[sec.k]=l.id;render();focusFirst(sec.k);},onkeydown:e=>{if(e.key==='Enter'){editing[sec.k]=l.id;render();focusFirst(sec.k);}}},
+  return el('div',{class:'ln'+(sec.type==='sav'&&l.inTotal===false?' off':''),tabindex:'0',role:'button',onclick:()=>{editing[sec.k]=l.id;render();focusFirst(sec.k);},onkeydown:e=>{if(e.key==='Enter'){editing[sec.k]=l.id;render();focusFirst(sec.k);}}},
     el('div',{class:'a'},a,...tags),
     el('div',{class:'r'},el('div',{class:'v amt',text:eur(v.value)})),
     el('div',{class:'b amt',text:b}),
@@ -153,9 +158,10 @@ function editForm(sec,l){
   const isNew=!l;l=l||{};
   const f=el('form',{class:'edit',onsubmit:e=>{e.preventDefault();commit(sec,l.id,new FormData(f),f);}});
   if(sec.type==='sav'){
-    f.append(inp('label','Libellé',l.label,{ph:'ex. Livret'}),inp('amount','Solde (€)',l.amount,{num:1}),inp('rate','Taux % (facultatif)',l.rate,{num:1}));
-    if(!sec.excluded){const cb=el('input',{type:'checkbox',name:'capped'});cb.checked=!!l.capped;f.append(el('label',null,'Plafond atteint',el('span',null,cb,' intérêts compensés')));}
-    f.append(inp('note','Note (facultatif)',l.note,{full:1,ph:sec.excluded?'':'ex. intérêts capitalisés au 31/12'}));
+    f.append(inp('label','Libellé',l.label,{ph:'ex. Livret A'}),inp('inst','Établissement / titulaire',l.inst,{ph:'ex. banque, prénom'}),inp('amount','Solde (€)',l.amount,{num:1}),inp('rate','Taux % (facultatif)',l.rate,{num:1}));
+    const cb=el('input',{type:'checkbox',name:'capped'});cb.checked=!!l.capped;f.append(el('label',{class:'chk'},el('span',null,cb,' Plafond atteint / intérêts compensés')));
+    const ct=el('input',{type:'checkbox',name:'inTotal'});ct.checked=l.inTotal!==false;f.append(el('label',{class:'chk'},el('span',null,ct,' Compte dans le total')));
+    f.append(inp('note','Note (facultatif)',l.note,{full:1,ph:'ex. intérêts capitalisés au 31/12'}));
   }else if(sec.type==='cry'){
     f.append(inp('sym','Symbole',l.sym,{ph:'BTC'}),inp('qty','Quantité',l.qty,{num:1}),inp('pru','PRU € (facultatif)',l.pru,{num:1}),
       inp('cgId','ID CoinGecko (auto)',l.cgId,{ph:CG_MAP[(l.sym||'').toUpperCase()]||'auto'}),inp('price','Cours € (auto / manuel)',l.price,{num:1,full:1}));
@@ -175,7 +181,7 @@ function commit(sec,id,fd,form){
   const g=k=>(fd.get(k)||'').toString().trim();const n=k=>{const v=num(g(k));return isFinite(v)?v:null;};
   let o;
   if(sec.type==='sav'){if(!g('label')&&n('amount')===null){toast('Renseigne au moins un libellé ou un solde');return;}
-    o={label:g('label')||'Compte',amount:n('amount')??0,rate:n('rate'),note:g('note')};if(!sec.excluded)o.capped=!!form.querySelector('[name=capped]')?.checked;}
+    o={label:g('label')||'Compte',inst:g('inst'),amount:n('amount')??0,rate:n('rate'),note:g('note'),capped:!!form.querySelector('[name=capped]')?.checked,inTotal:!!form.querySelector('[name=inTotal]')?.checked};}
   else if(sec.type==='cry'){if(!g('sym')){toast('Symbole requis');return;}o={sym:g('sym').toUpperCase(),qty:n('qty')??0,pru:n('pru'),cgId:g('cgId').toLowerCase()};
     const p=n('price');o.price=p;}
   else{if(!g('ticker')){toast('Ticker requis');return;}o={ticker:g('ticker').toUpperCase(),name:g('name'),qty:n('qty')??0,pru:n('pru'),cur:g('cur')||'EUR',apiSym:g('apiSym')};o.price=n('price');}
@@ -250,10 +256,11 @@ function demo(){
   d.pea=[{id:uid(),ticker:'DEMO-MONDE',name:'Démo ETF Monde',qty:10,pru:100,cur:'EUR',price:112.5,priceAt:Date.now(),priceSrc:'manuel'},
          {id:uid(),ticker:'DEMO-EUR',name:'Démo Action Europe',qty:25,pru:40,cur:'EUR',price:36.2,priceAt:Date.now(),priceSrc:'manuel'}];
   d.cto=[{id:uid(),ticker:'DEMO-US',name:'Démo Tech US',qty:5,pru:150,cur:'USD',price:171,priceAt:Date.now(),priceSrc:'manuel'}];
-  d.savRev=[{id:uid(),label:'Démo Coffre',amount:1500,rate:2.5,note:''}];
-  d.savLbp=[{id:uid(),label:'Démo Livret',amount:5000,rate:1.5,capped:false,note:''},{id:uid(),label:'Démo Livret plafonné',amount:10000,rate:1.5,capped:true,note:'Démo'}];
+  d.savings=[{id:uid(),label:'Démo Coffre',inst:'Banque Démo A',amount:1500,rate:2.5,note:'',inTotal:true},
+    {id:uid(),label:'Démo Livret',inst:'Banque Démo B',amount:5000,rate:1.5,capped:false,note:'',inTotal:true},
+    {id:uid(),label:'Démo Livret plafonné',inst:'Banque Démo B',amount:10000,rate:1.5,capped:true,note:'Démo',inTotal:true},
+    {id:uid(),label:'Démo Livret enfant',inst:'Enfant A',amount:800,note:'',inTotal:false}];
   d.crypto=[{id:uid(),sym:'BTC',qty:0.01,pru:50000,cgId:'bitcoin'},{id:uid(),sym:'ETH',qty:0.2,pru:2000,cgId:'ethereum'}];
-  d.kids=[{id:uid(),label:'Démo Enfant A',amount:800,note:''}];
   return d;
 }
 function exportJSON(){
@@ -261,10 +268,28 @@ function exportJSON(){
   const blob=new Blob([JSON.stringify(out,null,2)],{type:'application/json'});const a=el('a',{href:URL.createObjectURL(blob),download:'portefeuille-'+new Date().toISOString().slice(0,10)+'.json'});
   document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove();},500);toast('Export téléchargé');
 }
+function isData(d){return d&&typeof d==='object'&&(SECTIONS.some(s=>Array.isArray(d[s.k]))||LEGACY_SAV.some(x=>Array.isArray(d[x[0]])));}
+function applyImport(d){const keepKey=S.settings.apiKey;S=normalize(d);if(!S.settings.apiKey&&keepKey)S.settings.apiKey=keepKey;save();render();refreshAll(false);}
+async function hashImport(){
+  const h=location.hash;if(!h.startsWith('#import='))return;
+  const clear=()=>history.replaceState(null,'',location.pathname+location.search);
+  try{
+    let b64=decodeURIComponent(h.slice(8)).replace(/-/g,'+').replace(/_/g,'/');while(b64.length%4)b64+='=';
+    let bytes=Uint8Array.from(atob(b64),c=>c.charCodeAt(0));
+    let txt;
+    if(bytes[0]===0x7b||bytes[0]===0xef){txt=new TextDecoder().decode(bytes);}
+    else{const fmt=(bytes[0]&0x0f)===8&&((bytes[0]<<8)|bytes[1])%31===0?'deflate':'deflate-raw';
+      const st=new Blob([bytes]).stream().pipeThrough(new DecompressionStream(fmt));txt=await new Response(st).text();}
+    const d=JSON.parse(txt);if(!isData(d))throw new Error('format');
+    clear();
+    if(!confirm('Importer ces données ?'+(SECTIONS.some(s=>S[s.k].length)?'\n(Les données actuelles de ce navigateur seront remplacées.)':'')))return;
+    applyImport(d);toast('Import réussi');
+  }catch(e){clear();toast('Lien d\'import invalide');}
+}
 function importJSON(file){
-  const r=new FileReader();r.onload=()=>{try{const d=JSON.parse(r.result);if(!SECTIONS.some(s=>Array.isArray(d[s.k])))throw new Error('format');
+  const r=new FileReader();r.onload=()=>{try{const d=JSON.parse(r.result);if(!isData(d))throw new Error('format');
     if(!confirm('Remplacer les données actuelles par celles du fichier ?'))return;
-    const keepKey=S.settings.apiKey;S=normalize(d);if(!S.settings.apiKey&&keepKey)S.settings.apiKey=keepKey;save();render();toast('Import réussi');refreshAll(false);}
+    applyImport(d);toast('Import réussi');}
     catch(e){toast('Fichier invalide');}};r.readAsText(file);
 }
 
@@ -282,7 +307,8 @@ const loadDemo=()=>{const has=SECTIONS.some(s=>S[s.k].length)&&!S.demo;if(has&&!
 $('#btnDemo').onclick=loadDemo;$('#btnDemo2').onclick=loadDemo;
 $('#btnReset').onclick=()=>{if(!confirm('Effacer toutes les données de ce navigateur ?'))return;const st=S.settings;S=blank();S.settings.provider=st.provider;S.settings.apiKey=st.apiKey;save();render();dlg.close();toast('Données effacées');};
 $('#btnClearDemo').onclick=()=>{const st=S.settings;S=blank();S.settings.provider=st.provider;S.settings.apiKey=st.apiKey;save();render();};
-render();refreshAll(false);
+render();refreshAll(false);hashImport();
+window.addEventListener('hashchange',hashImport);
 setInterval(()=>{if(!document.hidden)refreshAll(false);},5*60e3);
 document.addEventListener('visibilitychange',()=>{if(!document.hidden&&Date.now()-S.cryptoAt>5*60e3)refreshAll(false);});
 })();

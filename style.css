@@ -85,3 +85,8 @@ body.masked .amt{filter:blur(9px)}
   .edit{grid-template-columns:repeat(4,minmax(0,1fr))}
   .donut{width:180px;height:180px}
 }
+.ln.off{opacity:.5}
+.tag.off{background:#64748b33;color:#94a3b8}
+.edit label.chk{justify-content:flex-end;color:var(--txt);font-size:13px}
+.edit label.chk input{width:auto;margin-right:6px;vertical-align:middle}
+.legend li.off{opacity:.7}
