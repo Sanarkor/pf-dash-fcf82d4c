@@ -7,7 +7,8 @@ const SECTIONS=[
   {k:'savRev',name:'Épargne Revolut',     type:'sav', color:'#a78bfa'},
   {k:'savLbp',name:'Épargne La Banque Postale', type:'sav', color:'#fbbf24'},
   {k:'crypto',name:'Crypto',              type:'cry', color:'#f472b6'},
-  {k:'kids',  name:'Comptes enfants',     type:'sav', color:'#22d3ee', excluded:true}
+  {k:'kids',  name:'Comptes enfants',     type:'sav', color:'#22d3ee', excluded:true},
+  {k:'spouse',name:'Ma femme',            type:'sav', color:'#fb923c', excluded:true}
 ];
 const CG_MAP={BTC:'bitcoin',ETH:'ethereum',DOGE:'dogecoin',SOL:'solana',HYPE:'hyperliquid',ATH:'aethir',TON:'the-open-network',DOGS:'dogs-2',
   XRP:'ripple',BNB:'binancecoin',ADA:'cardano',USDT:'tether',USDC:'usd-coin',DOT:'polkadot',AVAX:'avalanche-2',LINK:'chainlink',PEPE:'pepe',
@@ -17,7 +18,7 @@ const CG_MAP={BTC:'bitcoin',ETH:'ethereum',DOGE:'dogecoin',SOL:'solana',HYPE:'hy
 const CURS=['EUR','USD','GBP','CHF','CAD','JPY'];
 
 /* ---------- state ---------- */
-function blank(){return {v:1,demo:false,pea:[],cto:[],savRev:[],savLbp:[],crypto:[],kids:[],
+function blank(){return {v:1,demo:false,pea:[],cto:[],savRev:[],savLbp:[],crypto:[],kids:[],spouse:[],
   settings:{provider:'none',apiKey:'',masked:false,collapsed:{}},fx:{rates:{EUR:1},at:0,src:''},cryptoAt:0,stocksAt:0};}
 let S=load();
 function load(){
@@ -102,8 +103,8 @@ function drawDonut(parts,total){
   const lg=$('#legend');lg.textContent='';
   for(const p of parts){const li=el('li',null,el('span',{class:'dot'}),el('span',{class:'nm',text:p.sec.name}),el('span',{class:'pc',text:total>0?(p.v/total*100).toFixed(1).replace('.',',')+' %':'—'}),el('span',{class:'vl amt',text:eur(p.v)}));
     li.style.setProperty('--c',p.sec.color);lg.appendChild(li);}
-  const kv=secVal(SECTIONS.find(s=>s.k==='kids')).value;
-  if(S.kids.length){const li=el('li',{class:'mut'},el('span',{class:'dot'}),el('span',{class:'nm',text:'Comptes enfants (hors total)'}),el('span',{class:'pc',text:''}),el('span',{class:'vl amt',text:eur(kv)}));li.style.setProperty('--c','#22d3ee');lg.appendChild(li);}
+  for(const sec of SECTIONS){if(!sec.excluded||!S[sec.k].length)continue;const kv=secVal(sec).value;
+    const li=el('li',{class:'mut'},el('span',{class:'dot'}),el('span',{class:'nm',text:sec.name+' (hors total)'}),el('span',{class:'pc',text:''}),el('span',{class:'vl amt',text:eur(kv)}));li.style.setProperty('--c',sec.color);lg.appendChild(li);}
 }
 function renderSection(sec){
   const v=secVal(sec);const collapsed=!!S.settings.collapsed[sec.k];
