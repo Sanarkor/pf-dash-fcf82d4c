@@ -177,9 +177,6 @@ function lineUsd(sec,l,v){const c=(l.cur||'EUR').toUpperCase();const q=num(l.qty
     return {value:isFinite(p)?q*p:(isFinite(pru)?q*pru:0),pnl:isFinite(p)&&isFinite(pru)?q*(p-pru):NaN,cost:isFinite(pru)?q*pru:NaN,alt:[isFinite(p)&&isFinite(r)?'cours '+eur(p*r):null,isFinite(pru)&&isFinite(r)?'PRU '+eur(pru*r):null]};}
   const k=sec.type==='cry'?1:fx(c);
   return {value:toUsd(v.value),pnl:toUsd(v.pnl),cost:toUsd(v.cost),alt:[isFinite(p)?'cours '+usdS(toUsd(p*k)):null,isFinite(pru)?'PRU '+usdS(toUsd(pru*k)):null]};}
-function usdPnl(pnl,cost){if(!isFinite(pnl))return null;const c=cls(pnl);
-  return el('div',{class:'usd amt '+c,text:sUsd(pnl)+(isFinite(cost)&&cost>0?' '+pct(pnl/cost*100)+' $':'')});}
-function secUsd(sec){let pnl=0,cost=0,has=false;for(const l of S[sec.k]){const u=lineUsd(sec,l,lineVal(sec,l));if(isFinite(u.pnl)&&isFinite(u.cost)){pnl+=u.pnl;cost+=u.cost;has=true;}}return has?{pnl,cost}:null;}
 function usdEl(n,signed,extra){const t=signed?sUsd(n):usdS(n);return t&&t!=='—'?el('div',{class:'usd amt'+(extra?' '+extra:''),text:t}):null;}
 function totBlock(v){return el('div',{class:'sec-tot'},el('div',{class:'v amt',text:eur(v.value)}),
   isFinite(v.pnl)?el('div',{class:'pl'},v.cost>0?el('span',{class:'pill amt '+cls(v.pnl),text:pct(v.pnl/v.cost*100)}):null,el('span',{class:'pe amt '+cls(v.pnl),text:signed(v.pnl)})):null,
@@ -207,7 +204,6 @@ function renderSection(sec,isSub){
     el('div',{class:'sec-right'},
       el('div',{class:'sec-tot'},el('div',{class:'v amt',text:eur(v.value)}),isDual(sec)?usdEl(toUsd(v.value),false,'usd-tot'):null,
         isFinite(v.pnl)?el('div',{class:'pl'},v.cost>0?el('span',{class:'pill amt '+cls(v.pnl),text:pct(v.pnl/v.cost*100)}):null,el('span',{class:'pe amt '+cls(v.pnl),text:signed(v.pnl)})):null,
-        isDual(sec)&&isFinite(v.pnl)?(()=>{const su=secUsd(sec);return su?usdPnl(su.pnl,su.cost):null;})():null,
         v.offN?el('div',{class:'p mut amt',text:'+ '+eur(v.off)+' hors total'}):null),
       el('span',{class:'chev','aria-hidden':'true'})));
   card.appendChild(head);
@@ -276,7 +272,7 @@ function lineRow(sec,l){
       onclick:e=>{e.stopPropagation();if(VIEW){e.preventDefault();return;}l.inTotal=e.target.checked;touch();save();render();},onkeydown:e=>e.stopPropagation()}):null,a,...tags),
     el('div',{class:'r'},el('div',{class:'v amt',text:eur(v.value)}),U?usdEl(U.value):null),
     el('div',{class:'b amt',text:b}),
-    el('div',{class:'r'},isFinite(v.pnl)?el('div',{class:'p amt '+cls(v.pnl),text:signed(v.pnl)+(v.cost>0?' '+pct(v.pnl/v.cost*100):'')}):el('div',{class:'p',text:''}),U?usdPnl(U.pnl,U.cost):null),
+    el('div',{class:'r'},isFinite(v.pnl)?el('div',{class:'p amt '+cls(v.pnl),text:signed(v.pnl)+(v.cost>0?' '+pct(v.pnl/v.cost*100):'')}):el('div',{class:'p',text:''})),
     U&&U.alt.some(Boolean)?el('div',{class:'b2 amt',text:'≈ '+U.alt.filter(Boolean).join(' · ')}):null);
 }
 function inp(name,label,val,opts={}){
