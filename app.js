@@ -83,7 +83,10 @@ function secVal(sec){let value=0,cost=0,pnl=0,hasPnl=false,off=0,offN=0;for(cons
 
 /* ---------- render ---------- */
 const editing={}; // sectionKey -> line id | 'new'
+const DEF_NAME='Clebardo';
+function dispName(){return String(S.settings.displayName||'').trim()||DEF_NAME;}
 function render(){
+  {const n=$('#ptName');if(n)n.textContent=dispName();}
   document.body.classList.toggle('masked',!!S.settings.masked);
   $('#demoBanner').classList.toggle('hidden',!S.demo);
   let total=0,tp=0,tc=0,hp=false;const parts=[];
@@ -383,7 +386,7 @@ function importJSON(file){
 /* ---------- online copy (data.json in the repo) ---------- */
 function cleanForCloud(){ // never publish the API key, the GitHub token or local UI state
   const o=JSON.parse(JSON.stringify(S));
-  o.settings={provider:o.settings.provider||'none'};
+  o.settings={provider:o.settings.provider||'none',displayName:String(o.settings.displayName||'').trim()};
   delete o.cloudAt;o.app='pf-dash';o.demo=false;return o;
 }
 function applyRemote(d){ // keep this browser's settings (API key, provider, masked, collapsed)
@@ -391,6 +394,7 @@ function applyRemote(d){ // keep this browser's settings (API key, provider, mas
   if(st.provider&&st.provider!=='none'||st.apiKey)S.settings=st;
   else S.settings=Object.assign({},S.settings,{apiKey:'',collapsed:st.collapsed||{},masked:!!st.masked});
   delete S.settings.token;
+  S.settings.displayName=(d.settings&&typeof d.settings.displayName==='string')?d.settings.displayName:(st.displayName||'');
   S.updatedAt=+d.updatedAt||0;S.cloudAt=S.updatedAt;save();render();refreshAll(false);
 }
 async function fetchRemote(fresh){
@@ -459,10 +463,11 @@ $('#btnRefresh').onclick=()=>refreshAll(true);
 $('#btnMask').onclick=()=>{S.settings.masked=!S.settings.masked;save();render();};
 const dlg=$('#dlgSettings');
 function closeDlg(){if(!dlg.open)return;if(dlg.close)dlg.close();else{dlg.removeAttribute('open');dlg.dispatchEvent(new Event('close'));}}
-$('#btnSettings').onclick=()=>{$('#setProvider').value=S.settings.provider||'none';$('#setKey').value=S.settings.apiKey||'';$('#setToken').value=localStorage.getItem(TOKEN_KEY)||'';if(dlg.showModal)dlg.showModal();else dlg.setAttribute('open','');};
+$('#btnSettings').onclick=()=>{$('#setProvider').value=S.settings.provider||'none';$('#setKey').value=S.settings.apiKey||'';$('#setToken').value=localStorage.getItem(TOKEN_KEY)||'';$('#setName').value=S.settings.displayName||'';if(dlg.showModal)dlg.showModal();else dlg.setAttribute('open','');};
 $('#btnPaste').onclick=()=>{const t=$('#pasteImport').value;if(!t.trim()){toast('Colle d\'abord le lien ou le JSON');return;}$('#pasteImport').value='';closeDlg();importFromText(t,false);};
 $('#btnCloseDlg').onclick=e=>{e.preventDefault();closeDlg();};
 dlg.addEventListener('close',()=>{const tk=$('#setToken').value.trim();try{if(tk)localStorage.setItem(TOKEN_KEY,tk);else localStorage.removeItem(TOKEN_KEY);}catch(e){}
+  const nm=$('#setName').value.trim().slice(0,40);if(nm!==(S.settings.displayName||'')){S.settings.displayName=nm;touch();}
   const p=$('#setProvider').value,k=$('#setKey').value.trim();const ch=p!==S.settings.provider||k!==S.settings.apiKey;
   S.settings.provider=p;S.settings.apiKey=k;save();render();if(ch&&p!=='none'&&k)refreshAll(true);});
 $('#btnExport').onclick=exportJSON;
