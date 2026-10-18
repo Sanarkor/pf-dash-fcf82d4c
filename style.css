@@ -168,3 +168,7 @@ main{overflow-x:clip}
 .cash-edit{border-color:#fbbf2466}
 .ln.cash .ct{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0}
 @media (max-width:520px){.ln.cash .a{white-space:normal}.ln.cash .ct{white-space:normal;line-height:1.25}}
+/* third-party savings */
+.pt-main .tn{white-space:nowrap}
+.pt-main{max-width:100%;overflow-wrap:anywhere;text-wrap:balance}
+.tag.third{background:#a78bfa22;color:#c4b5fd}
