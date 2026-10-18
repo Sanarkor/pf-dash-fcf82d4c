@@ -1,6 +1,64 @@
 {
- "v": 2,
+ "v": 3,
  "demo": false,
+ "sections": [
+  {
+   "k": "pea",
+   "name": "PEA",
+   "type": "sec",
+   "color": "#34d399",
+   "group": "Investissement / Bourse"
+  },
+  {
+   "k": "cto",
+   "name": "CTO",
+   "type": "sec",
+   "color": "#60a5fa",
+   "group": "Investissement / Bourse"
+  },
+  {
+   "k": "savings",
+   "name": "Épargne",
+   "type": "sav",
+   "color": "#fbbf24"
+  },
+  {
+   "k": "crypto",
+   "name": "Crypto",
+   "type": "cry",
+   "color": "#f472b6"
+  }
+ ],
+ "cash": {
+  "pea": {
+   "amount": 28.64,
+   "cur": "EUR"
+  },
+  "cto": {
+   "amount": 188.38,
+   "cur": "USD"
+  },
+  "crypto": {
+   "amount": 28.06,
+   "cur": "EUR"
+  }
+ },
+ "recurring": [],
+ "recHistory": [],
+ "settings": {
+  "provider": "twelvedata",
+  "displayName": "San"
+ },
+ "fx": {
+  "rates": {
+   "EUR": 1,
+   "USD": 0.888651915044877
+  },
+  "at": 1792346226023,
+  "src": "frankfurter (2026-10-16)"
+ },
+ "cryptoAt": 1792346226095,
+ "stocksAt": 1792346225997,
  "pea": [
   {
    "id": "cb68oojb5zg3",
@@ -15,11 +73,12 @@
    "mkt": "_PAR",
    "src": "auto",
    "ovType": "STOCK",
-   "chg": -0.5796,
-   "priceAt": 1792323560845,
+   "chg": -0.57957,
+   "priceAt": 1792346226024,
    "priceSrc": "auto",
    "via": "onvista Paris",
-   "autoFail": false
+   "autoFail": false,
+   "quoteAt": 1792166100004
   },
   {
    "id": "82jysi2r36hu",
@@ -34,11 +93,12 @@
    "mkt": "_PAR",
    "src": "auto",
    "ovType": "FUND",
-   "chg": -0.1419,
-   "priceAt": 1792323560845,
+   "chg": -0.141889,
+   "priceAt": 1792346226024,
    "priceSrc": "auto",
    "via": "onvista Paris",
-   "autoFail": false
+   "autoFail": false,
+   "quoteAt": 1792166100014
   },
   {
    "id": "e34mnh3cgjd7",
@@ -53,11 +113,12 @@
    "mkt": "_PAR",
    "src": "auto",
    "ovType": "FUND",
-   "chg": -1.0484,
-   "priceAt": 1792323560845,
+   "chg": -1.048355,
+   "priceAt": 1792346226024,
    "priceSrc": "auto",
    "via": "onvista Paris",
-   "autoFail": false
+   "autoFail": false,
+   "quoteAt": 1792166100017
   },
   {
    "id": "hqha0ld2otsa",
@@ -72,11 +133,12 @@
    "mkt": "_PAR",
    "src": "auto",
    "ovType": "FUND",
-   "chg": -0.1379,
-   "priceAt": 1792323560845,
+   "chg": -0.137925,
+   "priceAt": 1792346226024,
    "priceSrc": "auto",
    "via": "onvista Paris",
-   "autoFail": false
+   "autoFail": false,
+   "quoteAt": 1792166100016
   },
   {
    "id": "qlqcpdfr69nf",
@@ -91,11 +153,12 @@
    "mkt": "_PAR",
    "src": "auto",
    "ovType": "FUND",
-   "chg": -1.1449,
-   "priceAt": 1792323560845,
+   "chg": -1.144895,
+   "priceAt": 1792346226027,
    "priceSrc": "auto",
    "via": "onvista Paris",
-   "autoFail": false
+   "autoFail": false,
+   "quoteAt": 1792166100017
   }
  ],
  "cto": [
@@ -113,10 +176,11 @@
    "src": "auto",
    "ovType": "STOCK",
    "chg": -8.9374,
-   "priceAt": 1792323325049,
+   "priceAt": 1792346154152,
    "priceSrc": "auto",
    "via": "Twelve Data",
-   "autoFail": false
+   "autoFail": false,
+   "quoteAt": 1792180740000
   },
   {
    "id": "rxr69867za4u",
@@ -132,10 +196,11 @@
    "src": "auto",
    "ovType": "STOCK",
    "chg": -1.7427,
-   "priceAt": 1792323293279,
+   "priceAt": 1792346192936,
    "priceSrc": "auto",
    "via": "Twelve Data",
-   "autoFail": false
+   "autoFail": false,
+   "quoteAt": 1792180740000
   }
  ],
  "savings": [
@@ -144,20 +209,24 @@
    "label": "Livret A",
    "inst": "La Banque Postale",
    "amount": 25000,
-   "rate": null,
+   "rate": 1.7,
    "note": "Plafond atteint, intérêts compensés",
    "capped": true,
-   "inTotal": true
+   "inTotal": true,
+   "third": false,
+   "holder": ""
   },
   {
    "id": "fb72d01cd0c6",
    "label": "LDDS",
    "inst": "La Banque Postale",
    "amount": 12900,
-   "rate": null,
+   "rate": 1.7,
    "note": "",
    "capped": true,
-   "inTotal": true
+   "inTotal": true,
+   "third": false,
+   "holder": ""
   },
   {
    "id": "63a615851b95",
@@ -177,7 +246,9 @@
    "rate": null,
    "note": "",
    "capped": false,
-   "inTotal": true
+   "inTotal": false,
+   "third": true,
+   "holder": "Mel"
   },
   {
    "id": "a5130a3ea73f",
@@ -187,7 +258,9 @@
    "rate": null,
    "note": "",
    "capped": false,
-   "inTotal": false
+   "inTotal": false,
+   "third": true,
+   "holder": "Capy"
   },
   {
    "id": "2dd092451dc8",
@@ -197,7 +270,9 @@
    "rate": null,
    "note": "",
    "capped": false,
-   "inTotal": false
+   "inTotal": false,
+   "third": true,
+   "holder": "Chèvra"
   }
  ],
  "crypto": [
@@ -207,8 +282,8 @@
    "qty": 0.02726735,
    "pru": 64706.2,
    "cgId": "bitcoin",
-   "price": 72956,
-   "priceAt": 1792323560845,
+   "price": 72179,
+   "priceAt": 1792346226095,
    "priceSrc": "auto"
   },
   {
@@ -217,8 +292,8 @@
    "qty": 0.34031479,
    "pru": 1825.78,
    "cgId": "ethereum",
-   "price": 2149.2,
-   "priceAt": 1792323560845,
+   "price": 2106.43,
+   "priceAt": 1792346226095,
    "priceSrc": "auto"
   },
   {
@@ -227,8 +302,8 @@
    "qty": 2139.8918,
    "pru": 0.07773,
    "cgId": "dogecoin",
-   "price": 0.070529,
-   "priceAt": 1792323560845,
+   "price": 0.069132,
+   "priceAt": 1792346226095,
    "priceSrc": "auto"
   },
   {
@@ -237,8 +312,8 @@
    "qty": 1.746454,
    "pru": 80.73,
    "cgId": "solana",
-   "price": 92.51,
-   "priceAt": 1792323560845,
+   "price": 90.76,
+   "priceAt": 1792346226095,
    "priceSrc": "auto"
   },
   {
@@ -247,8 +322,8 @@
    "qty": 0.96654671,
    "pru": 64.69,
    "cgId": "hyperliquid",
-   "price": 70.22,
-   "priceAt": 1792323560845,
+   "price": 68.91,
+   "priceAt": 1792346226095,
    "priceSrc": "auto"
   },
   {
@@ -257,8 +332,8 @@
    "qty": 16.21168,
    "pru": 2.1253,
    "cgId": "layerzero",
-   "price": 1.64,
-   "priceAt": 1792323560845,
+   "price": 1.57,
+   "priceAt": 1792346226095,
    "priceSrc": "auto",
    "chg": null
   },
@@ -268,8 +343,8 @@
    "qty": 8.76254219,
    "pru": 1.3694,
    "cgId": "the-open-network",
-   "price": 1.2,
-   "priceAt": 1792323560845,
+   "price": 1.19,
+   "priceAt": 1792346226095,
    "priceSrc": "auto"
   },
   {
@@ -278,40 +353,12 @@
    "qty": 209970,
    "pru": 0.0000413665,
    "cgId": "dogs-2",
-   "price": 0.0000339,
-   "priceAt": 1792323560845,
+   "price": 0.00003299,
+   "priceAt": 1792346226095,
    "priceSrc": "auto"
   }
  ],
- "cash": {
-  "pea": {
-   "amount": 28.64,
-   "cur": "EUR"
-  },
-  "cto": {
-   "amount": 188.38,
-   "cur": "USD"
-  },
-  "crypto": {
-   "amount": 28.06,
-   "cur": "EUR"
-  }
- },
- "settings": {
-  "provider": "twelvedata",
-  "displayName": "San"
- },
- "fx": {
-  "rates": {
-   "EUR": 1,
-   "USD": 0.888651915044877
-  },
-  "at": 1792323560622,
-  "src": "frankfurter (2026-10-16)"
- },
- "cryptoAt": 1792323560845,
- "stocksAt": 1792323560845,
- "updatedAt": 1792323622362,
+ "updatedAt": 1792346261735,
  "app": "pf-dash",
- "savedAt": "2026-10-18T11:40:22.362Z"
+ "savedAt": "2026-10-18T17:57:41.735Z"
 }
