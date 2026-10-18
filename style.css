@@ -221,3 +221,7 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
 .env-row .env-grp{grid-column:2/-1;font-size:13px;padding:6px 10px}
 @media (max-width:520px){.env-row{grid-template-columns:10px minmax(0,1fr) auto auto;row-gap:6px}.env-row .env-type{grid-column:3/-1;grid-row:2;text-align:center}.env-row .env-grp{grid-column:2;grid-row:2}.env-row .dot{grid-row:1}}
 @media (max-width:520px){.sub-sec{padding:10px 9px}.grp-body{gap:8px}.sub-sec .sec-tot .v{font-size:17px}}
+/* GoatCounter visit pill: small, low-contrast, always visible, never over content */
+.gc-pill{position:fixed;left:max(8px,env(safe-area-inset-left));bottom:max(6px,env(safe-area-inset-bottom));z-index:5;display:inline-flex;align-items:center;gap:4px;padding:1px 8px;border-radius:999px;font:600 10.5px/18px system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;color:#94a3b8;background:#0b111bcc;border:1px solid #ffffff14;pointer-events:none;font-variant-numeric:tabular-nums;opacity:.75;-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px)}
+.gc-pill[hidden]{display:none}
+main{padding-bottom:calc(40px + env(safe-area-inset-bottom))}
