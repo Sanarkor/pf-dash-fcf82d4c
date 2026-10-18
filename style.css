@@ -33,7 +33,13 @@ main{max-width:980px;margin:0 auto;padding:14px 14px 40px}
 .legend .nm{flex:1}
 .legend .pc{color:var(--mut);font-variant-numeric:tabular-nums;width:52px;text-align:right}
 .legend .vl{font-variant-numeric:tabular-nums;min-width:90px;text-align:right}
-.sec-head{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;cursor:pointer;user-select:none}
+.sec-head{display:flex;justify-content:space-between;align-items:center;gap:10px;cursor:pointer;user-select:none;border-radius:10px;outline:none}
+.sec-head:focus-visible{box-shadow:0 0 0 2px #60a5fa88}
+.sec-right{display:flex;align-items:center;gap:12px}
+.chev{width:10px;height:10px;border-right:2px solid var(--mut);border-bottom:2px solid var(--mut);transform:rotate(45deg) translate(-2px,-2px);transition:transform .2s;flex:0 0 auto}
+.collapsed .chev{transform:rotate(-45deg)}
+.grp{color:var(--mut);font-size:11px;text-transform:uppercase;letter-spacing:.8px;margin:8px 2px 0}
+.tot-cb{width:16px;height:16px;margin:0 8px 0 0;vertical-align:-3px;accent-color:#34d399;cursor:pointer}
 .sec-title{display:flex;align-items:center;gap:10px;font-weight:650;font-size:16px}
 .sec-title .bar{width:4px;height:22px;border-radius:4px;background:var(--c)}
 .sec-sub{color:var(--mut);font-size:12px;font-weight:400}

@@ -106,26 +106,33 @@ function drawDonut(parts,total){
   const lg=$('#legend');lg.textContent='';
   for(const p of parts){const li=el('li',null,el('span',{class:'dot'}),el('span',{class:'nm',text:p.sec.name}),el('span',{class:'pc',text:total>0?(p.v/total*100).toFixed(1).replace('.',',')+' %':'—'}),el('span',{class:'vl amt',text:eur(p.v)}));
     li.style.setProperty('--c',p.sec.color);lg.appendChild(li);}
-  for(const sec of SECTIONS){const v=secVal(sec);if(!v.offN)continue;
-    const li=el('li',{class:'mut off'},el('span',{class:'dot'}),el('span',{class:'nm',text:sec.name+' hors total'}),el('span',{class:'pc',text:''}),el('span',{class:'vl amt',text:eur(v.off)}));li.style.setProperty('--c','#64748b');lg.appendChild(li);}
 }
 function renderSection(sec){
-  const v=secVal(sec);const collapsed=!!S.settings.collapsed[sec.k];
+  const v=secVal(sec);const collapsed=isCollapsed(sec.k);
   const card=el('section',{class:'card sec'+(collapsed?' collapsed':''),id:'sec-'+sec.k});card.style.setProperty('--c',sec.color);
   const sub=S[sec.k].length+(sec.type==='sav'?' compte(s)':' ligne(s)');
-  const head=el('div',{class:'sec-head',onclick:()=>{S.settings.collapsed[sec.k]=!collapsed;save();render();}},
-    el('div',{class:'sec-title'},el('span',{class:'bar'}),el('div',null,el('div',{text:(collapsed?'▸ ':'▾ ')+sec.name}),el('div',{class:'sec-sub',text:sub}))),
-    el('div',{class:'sec-tot'},el('div',{class:'v amt',text:eur(v.value)}),
-      isFinite(v.pnl)?el('div',{class:'p amt '+cls(v.pnl),text:signed(v.pnl)+(v.cost>0?' ('+pct(v.pnl/v.cost*100)+')':'')}):null,
-      v.offN?el('div',{class:'p mut amt',text:'+ '+eur(v.off)+' hors total'}):null));
+  const toggle=()=>{S.settings.collapsed[sec.k]=!collapsed;save();render();};
+  const head=el('div',{class:'sec-head',role:'button',tabindex:'0','aria-expanded':String(!collapsed),'aria-controls':'body-'+sec.k,onclick:toggle,onkeydown:e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();toggle();}}},
+    el('div',{class:'sec-title'},el('span',{class:'bar'}),el('div',null,el('div',{text:sec.name}),el('div',{class:'sec-sub',text:sub}))),
+    el('div',{class:'sec-right'},
+      el('div',{class:'sec-tot'},el('div',{class:'v amt',text:eur(v.value)}),
+        isFinite(v.pnl)?el('div',{class:'p amt '+cls(v.pnl),text:signed(v.pnl)+(v.cost>0?' ('+pct(v.pnl/v.cost*100)+')':'')}):null,
+        v.offN?el('div',{class:'p mut amt',text:'+ '+eur(v.off)+' hors total'}):null),
+      el('span',{class:'chev','aria-hidden':'true'})));
   card.appendChild(head);
-  const body=el('div',{class:'sec-body'});const list=el('div',{class:'lines'});
-  for(const l of S[sec.k]){list.appendChild(editing[sec.k]===l.id?editForm(sec,l):lineRow(sec,l));}
+  const body=el('div',{class:'sec-body',id:'body-'+sec.k});const list=el('div',{class:'lines'});
+  let rows=S[sec.k];
+  if(sec.type==='sav'){const on=rows.filter(l=>l.inTotal!==false),off=rows.filter(l=>l.inTotal===false);rows=on;
+    for(const l of on)list.appendChild(editing[sec.k]===l.id?editForm(sec,l):lineRow(sec,l));
+    if(off.length){list.appendChild(el('div',{class:'grp',text:'Hors total · '+eur(v.off)}));for(const l of off)list.appendChild(editing[sec.k]===l.id?editForm(sec,l):lineRow(sec,l));}
+    rows=[];}
+  for(const l of rows){list.appendChild(editing[sec.k]===l.id?editForm(sec,l):lineRow(sec,l));}
   if(editing[sec.k]==='new')list.appendChild(editForm(sec,null));
   body.appendChild(list);
   if(editing[sec.k]!=='new')body.appendChild(el('button',{class:'add',onclick:()=>{editing[sec.k]='new';render();focusFirst(sec.k);}},'+ Ajouter '+(sec.type==='sav'?'un compte':sec.type==='cry'?'une crypto':'une ligne')));
   card.appendChild(body);return card;
 }
+function isCollapsed(k){const c=S.settings.collapsed[k];return c===undefined?k==='savings':!!c;}
 function focusFirst(k){setTimeout(()=>{const i=document.querySelector('#sec-'+k+' .edit input');if(i)i.focus();},30);}
 function lineRow(sec,l){
   const v=lineVal(sec,l);let a,b,tags=[];
@@ -144,7 +151,8 @@ function lineRow(sec,l){
     if(v.missing)tags.push(el('span',{class:'tag',text:'cours manquant'}));if(v.fxMissing)tags.push(el('span',{class:'tag',text:'change ?'}));
   }
   return el('div',{class:'ln'+(sec.type==='sav'&&l.inTotal===false?' off':''),tabindex:'0',role:'button',onclick:()=>{editing[sec.k]=l.id;render();focusFirst(sec.k);},onkeydown:e=>{if(e.key==='Enter'){editing[sec.k]=l.id;render();focusFirst(sec.k);}}},
-    el('div',{class:'a'},a,...tags),
+    el('div',{class:'a'},sec.type==='sav'?el('input',{type:'checkbox',class:'tot-cb',title:'Compte dans le total','aria-label':'Compte dans le total',checked:l.inTotal!==false,
+      onclick:e=>{e.stopPropagation();l.inTotal=e.target.checked;save();render();},onkeydown:e=>e.stopPropagation()}):null,a,...tags),
     el('div',{class:'r'},el('div',{class:'v amt',text:eur(v.value)})),
     el('div',{class:'b amt',text:b}),
     el('div',{class:'r'},isFinite(v.pnl)?el('div',{class:'p amt '+cls(v.pnl),text:signed(v.pnl)+(v.cost>0?' '+pct(v.pnl/v.cost*100):'')}):el('div',{class:'p',text:''})));
@@ -252,7 +260,7 @@ async function refreshAll(manual){
 
 /* ---------- demo / io ---------- */
 function demo(){
-  const d=blank();d.demo=true;d.settings=Object.assign({},S.settings,{collapsed:{}});d.fx=S.fx;
+  const d=blank();d.demo=true;d.settings=Object.assign({},S.settings);d.fx=S.fx;
   d.pea=[{id:uid(),ticker:'DEMO-MONDE',name:'Démo ETF Monde',qty:10,pru:100,cur:'EUR',price:112.5,priceAt:Date.now(),priceSrc:'manuel'},
          {id:uid(),ticker:'DEMO-EUR',name:'Démo Action Europe',qty:25,pru:40,cur:'EUR',price:36.2,priceAt:Date.now(),priceSrc:'manuel'}];
   d.cto=[{id:uid(),ticker:'DEMO-US',name:'Démo Tech US',qty:5,pru:150,cur:'USD',price:171,priceAt:Date.now(),priceSrc:'manuel'}];
@@ -269,7 +277,7 @@ function exportJSON(){
   document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove();},500);toast('Export téléchargé');
 }
 function isData(d){return d&&typeof d==='object'&&(SECTIONS.some(s=>Array.isArray(d[s.k]))||LEGACY_SAV.some(x=>Array.isArray(d[x[0]])));}
-function applyImport(d){const keepKey=S.settings.apiKey;S=normalize(d);if(!S.settings.apiKey&&keepKey)S.settings.apiKey=keepKey;save();render();refreshAll(false);}
+function applyImport(d){const keepKey=S.settings.apiKey,keepCol=S.settings.collapsed,keepMask=S.settings.masked;S=normalize(d);S.settings.collapsed=keepCol;S.settings.masked=keepMask;if(!S.settings.apiKey&&keepKey)S.settings.apiKey=keepKey;save();render();refreshAll(false);}
 async function hashImport(){
   const h=location.hash;if(!h.startsWith('#import='))return;
   const clear=()=>history.replaceState(null,'',location.pathname+location.search);
