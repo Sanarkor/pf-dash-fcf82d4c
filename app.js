@@ -59,7 +59,7 @@ function ago(t){if(!t)return 'jamais';const s=(Date.now()-t)/1000;if(s<60)return
 function el(tag,attrs,...kids){const e=document.createElement(tag);if(attrs)for(const[k,v]of Object.entries(attrs)){
   if(v===undefined||v===null||v===false)continue;if(k==='class')e.className=v;else if(k.startsWith('on'))e.addEventListener(k.slice(2),v);else if(k==='text')e.textContent=v;else e.setAttribute(k,v===true?'':v);}
   for(const c of kids.flat()){if(c===null||c===undefined||c===false)continue;e.appendChild(typeof c==='string'?document.createTextNode(c):c);}return e;}
-function toast(m){const t=$('#toast');t.textContent=m;t.classList.add('show');clearTimeout(toast._t);toast._t=setTimeout(()=>t.classList.remove('show'),2600);}
+function toast(m,ms){const t=$('#toast');t.textContent=m;t.classList.add('show');clearTimeout(toast._t);toast._t=setTimeout(()=>t.classList.remove('show'),ms||2600);}
 function fx(cur){cur=(cur||'EUR').toUpperCase();if(cur==='EUR')return 1;const r=S.fx.rates[cur];return isFinite(r)&&r>0?r:NaN;} // EUR per 1 unit
 
 /* ---------- valuation ---------- */
@@ -408,14 +408,23 @@ async function syncFromRemote(){
     sub:'Sauvegarde en ligne du '+new Date(ru).toLocaleString('fr-FR')+'. Les données de ce navigateur seront remplacées (Annuler pour les garder, puis « Sauvegarder en ligne »).'})){applyRemote(d);toast('Sauvegarde en ligne chargée');}
 }
 function b64utf8(s){const by=new TextEncoder().encode(s);let bin='';for(let i=0;i<by.length;i+=0x8000)bin+=String.fromCharCode.apply(null,by.subarray(i,i+0x8000));return btoa(bin);}
-async function ghPut(branch,content,token,msg){
+async function ghErr(r,branch,step){let m='';try{m=(await r.json()).message||'';}catch(e){}
+  const s=r.status;let hint='';
+  if(s===401)hint='Jeton invalide ou expiré';
+  else if(s===403)hint='Jeton sans droit d\'écriture : mets Contents sur Read and write pour pf-dash-fcf82d4c';
+  else if(s===404)hint='Dépôt introuvable pour ce jeton : sélectionne pf-dash-fcf82d4c dans le jeton';
+  else if(s===409||s===422)hint='Conflit de version, réessaie';
+  const e=new Error((hint?hint+' — ':'')+branch+' ('+step+') : HTTP '+s+(m?' « '+m+' »':''));e.status=s;return e;}
+async function ghPut(branch,content,token,msg,retry){
   const url='https://api.github.com/repos/'+REPO+'/contents/'+DATA_PATH;
   const h={Accept:'application/vnd.github+json',Authorization:'Bearer '+token,'X-GitHub-Api-Version':'2022-11-28'};
   let sha;const g=await fetch(url+'?ref='+encodeURIComponent(branch)+'&t='+Date.now(),{headers:h,cache:'no-store',credentials:'omit'});
-  if(g.ok)sha=(await g.json()).sha;else if(g.status!==404)throw new Error(branch+' : HTTP '+g.status);
+  if(g.ok)sha=(await g.json()).sha;else if(g.status!==404)throw await ghErr(g,branch,'lecture'); // 404 = first write: no sha
   const body={message:msg,content,branch};if(sha)body.sha=sha;
   const p=await fetch(url,{method:'PUT',headers:Object.assign({'Content-Type':'application/json'},h),body:JSON.stringify(body),credentials:'omit'});
-  if(!p.ok)throw new Error(branch+' : HTTP '+p.status);
+  if(p.ok)return;
+  if((p.status===409||p.status===422)&&!retry)return ghPut(branch,content,token,msg,true); // stale sha: re-read once
+  throw await ghErr(p,branch,'écriture');
 }
 let cloudBusy=false;
 async function saveOnline(){
@@ -430,7 +439,7 @@ async function saveOnline(){
     const content=b64utf8(JSON.stringify(o,null,1));
     for(const br of BRANCHES)await ghPut(br,content,token,'Sauvegarde des données ('+new Date(now).toLocaleString('fr-FR')+')');
     S.updatedAt=now;S.cloudAt=now;save();render();toast('☁️ Sauvegardé en ligne (visible partout d\'ici 1 à 2 min)');
-  }catch(e){toast('Échec de la sauvegarde ('+e.message+'). Vérifie le jeton.');}
+  }catch(e){toast('Échec de la sauvegarde : '+e.message,9000);}
   finally{cloudBusy=false;}
 }
 async function loadOnline(){
