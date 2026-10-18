@@ -9,7 +9,7 @@
 <meta name="theme-color" content="#0b0f17">
 <title>Dashboard</title>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%230b0f17'/%3E%3Cpath d='M7 22l6-7 5 4 7-9' stroke='%2334d399' stroke-width='3' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
-<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="style.css?v=5">
 </head>
 <body>
 <header class="top">
@@ -48,6 +48,16 @@
 <dialog id="dlgSettings">
   <form method="dialog" class="dlg">
     <h2>Réglages</h2>
+    <h3>Importer / sauvegarder</h3>
+    <div class="big-btns">
+      <button type="button" id="btnImport" class="primary">⬆ Importer un fichier JSON</button>
+      <button type="button" id="btnExport">⬇ Exporter (sauvegarde JSON)</button>
+      <input type="file" id="fileImport" accept="application/json,.json,text/plain" hidden>
+    </div>
+    <label>Ou colle ici un lien d'import (…#import=…) ou le contenu JSON
+      <textarea id="pasteImport" rows="3" autocomplete="off" spellcheck="false" placeholder="https://…#import=…"></textarea>
+    </label>
+    <div class="row-btns"><button type="button" id="btnPaste" class="primary">Importer le lien / texte collé</button></div>
     <h3>Cours des actions / ETF</h3>
     <p class="hint">Sans clé : cours différés via onvista à partir de l'<b>ISIN</b> de chaque ligne (Euronext Paris en priorité). Avec une clé gratuite Twelve Data, les lignes ayant un « Symbole Twelve Data » sont actualisées par Twelve Data (offre gratuite : marchés US). Si une source échoue, le dernier cours connu ou saisi est utilisé (badge « auto ✗ »).</p>
     <label>Source avec clé
@@ -58,22 +68,16 @@
       </select>
     </label>
     <label>Clé API <input id="setKey" type="password" autocomplete="off" spellcheck="false" placeholder="facultatif — stockée seulement dans ce navigateur"></label>
-    <h3>Sauvegarde</h3>
-    <div class="row-btns">
-      <button type="button" id="btnExport">Exporter JSON</button>
-      <button type="button" id="btnImport">Importer JSON</button>
-      <input type="file" id="fileImport" accept="application/json,.json" hidden>
-    </div>
     <h3>Données</h3>
     <div class="row-btns">
       <button type="button" id="btnDemo">Charger la démo</button>
       <button type="button" id="btnReset" class="danger">Tout effacer</button>
     </div>
-    <div class="row-btns end"><button value="close" class="primary" id="btnSaveSettings">Fermer</button></div>
+    <div class="row-btns end"><button type="button" class="primary" id="btnCloseDlg">Fermer</button></div>
   </form>
 </dialog>
 
 <div id="toast" class="toast" role="status" aria-live="polite"></div>
-<script src="app.js"></script>
+<script src="app.js?v=5"></script>
 </body>
 </html>
