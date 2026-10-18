@@ -6,8 +6,8 @@
    "id": "cb68oojb5zg3",
    "ticker": "STM",
    "name": "STMicroelectronics",
-   "qty": 9,
-   "pru": 57.878,
+   "qty": 12,
+   "pru": 53.483,
    "cur": "EUR",
    "apiSym": "",
    "price": 41.17,
@@ -16,7 +16,7 @@
    "src": "auto",
    "ovType": "STOCK",
    "chg": -0.5796,
-   "priceAt": 1792320684868,
+   "priceAt": 1792321009782,
    "priceSrc": "auto",
    "via": "onvista Paris",
    "autoFail": false
@@ -25,8 +25,8 @@
    "id": "82jysi2r36hu",
    "ticker": "DCAM",
    "name": "Amundi PEA Monde (MSCI World)",
-   "qty": 200,
-   "pru": 6.046,
+   "qty": 230,
+   "pru": 6.083,
    "cur": "EUR",
    "apiSym": "",
    "price": 6.334,
@@ -35,7 +35,7 @@
    "src": "auto",
    "ovType": "FUND",
    "chg": -0.1419,
-   "priceAt": 1792320684868,
+   "priceAt": 1792321009782,
    "priceSrc": "auto",
    "via": "onvista Paris",
    "autoFail": false
@@ -45,7 +45,7 @@
    "ticker": "PAASI",
    "name": "Amundi PEA Asie Émergente",
    "qty": 21,
-   "pru": 39.791,
+   "pru": 39.696,
    "cur": "EUR",
    "apiSym": "",
    "price": 37.755,
@@ -54,7 +54,7 @@
    "src": "auto",
    "ovType": "FUND",
    "chg": -1.0484,
-   "priceAt": 1792320684868,
+   "priceAt": 1792321009782,
    "priceSrc": "auto",
    "via": "onvista Paris",
    "autoFail": false
@@ -73,7 +73,7 @@
    "src": "auto",
    "ovType": "FUND",
    "chg": -0.1379,
-   "priceAt": 1792320684868,
+   "priceAt": 1792321009782,
    "priceSrc": "auto",
    "via": "onvista Paris",
    "autoFail": false
@@ -92,7 +92,7 @@
    "src": "auto",
    "ovType": "FUND",
    "chg": -1.1449,
-   "priceAt": 1792320684868,
+   "priceAt": 1792321009782,
    "priceSrc": "auto",
    "via": "onvista Paris",
    "autoFail": false
@@ -113,7 +113,7 @@
    "src": "auto",
    "ovType": "STOCK",
    "chg": -8.9374,
-   "priceAt": 1792320668281,
+   "priceAt": 1792321008478,
    "priceSrc": "auto",
    "via": "Twelve Data",
    "autoFail": false
@@ -123,7 +123,7 @@
    "ticker": "SPCX",
    "name": "SpaceX",
    "qty": 3,
-   "pru": 154,
+   "pru": 154.81,
    "cur": "USD",
    "apiSym": "SPCX",
    "price": 146.029999,
@@ -207,8 +207,8 @@
    "qty": 0.026,
    "pru": null,
    "cgId": "bitcoin",
-   "price": 73024,
-   "priceAt": 1792320684868,
+   "price": 73018,
+   "priceAt": 1792321009782,
    "priceSrc": "auto"
   },
   {
@@ -217,8 +217,8 @@
    "qty": 0.34,
    "pru": null,
    "cgId": "ethereum",
-   "price": 2151.79,
-   "priceAt": 1792320684868,
+   "price": 2152.04,
+   "priceAt": 1792321009782,
    "priceSrc": "auto"
   },
   {
@@ -227,8 +227,8 @@
    "qty": 2139.89,
    "pru": null,
    "cgId": "dogecoin",
-   "price": 0.070599,
-   "priceAt": 1792320684868,
+   "price": 0.070612,
+   "priceAt": 1792321009782,
    "priceSrc": "auto"
   },
   {
@@ -237,8 +237,8 @@
    "qty": 1.35,
    "pru": null,
    "cgId": "solana",
-   "price": 92.52,
-   "priceAt": 1792320684868,
+   "price": 92.5,
+   "priceAt": 1792321009782,
    "priceSrc": "auto"
   },
   {
@@ -247,8 +247,8 @@
    "qty": 0.96,
    "pru": null,
    "cgId": "hyperliquid",
-   "price": 70.31,
-   "priceAt": 1792320684868,
+   "price": 70.27,
+   "priceAt": 1792321009782,
    "priceSrc": "auto"
   },
   {
@@ -257,8 +257,8 @@
    "qty": 7896.8,
    "pru": null,
    "cgId": "aethir",
-   "price": 0.00485116,
-   "priceAt": 1792320684868,
+   "price": 0.00484923,
+   "priceAt": 1792321009782,
    "priceSrc": "auto"
   },
   {
@@ -268,7 +268,7 @@
    "pru": null,
    "cgId": "the-open-network",
    "price": 1.2,
-   "priceAt": 1792320684868,
+   "priceAt": 1792321009782,
    "priceSrc": "auto"
   },
   {
@@ -277,8 +277,8 @@
    "qty": 209970,
    "pru": null,
    "cgId": "dogs-2",
-   "price": 0.00003406,
-   "priceAt": 1792320684868,
+   "price": 0.00003401,
+   "priceAt": 1792321009782,
    "priceSrc": "auto"
   }
  ],
@@ -290,12 +290,12 @@
    "EUR": 1,
    "USD": 0.888651915044877
   },
-  "at": 1792320684865,
+  "at": 1792321009781,
   "src": "frankfurter (2026-10-16)"
  },
- "cryptoAt": 1792320684868,
- "stocksAt": 1792320700503,
- "updatedAt": 1792320828238,
+ "cryptoAt": 1792321009782,
+ "stocksAt": 1792321009782,
+ "updatedAt": 1792321196684,
  "app": "pf-dash",
- "savedAt": "2026-10-18T10:53:48.238Z"
+ "savedAt": "2026-10-18T10:59:56.684Z"
 }
