@@ -87,7 +87,7 @@ function render(){
   document.body.classList.toggle('masked',!!S.settings.masked);
   $('#demoBanner').classList.toggle('hidden',!S.demo);
   let total=0,tp=0,tc=0,hp=false;const parts=[];
-  for(const sec of SECTIONS){const v=secVal(sec);total+=v.value;if(isFinite(v.pnl)){tp+=v.pnl;tc+=v.cost;hp=true;}parts.push({sec,v:v.value});}
+  for(const sec of SECTIONS){const v=secVal(sec);total+=v.value;if(isFinite(v.pnl)){tp+=v.pnl;tc+=v.cost;hp=true;}parts.push({sec,v:v.value,pnl:v.pnl,cost:v.cost});}
   $('#total').textContent=eur(total);
   const tpEl=$('#totalPnl');tpEl.className='pnl amt '+(hp?cls(tp):'mut');
   tpEl.textContent=hp?('Plus/moins-value latente : '+signed(tp)+(tc>0?'  ('+pct(tp/tc*100)+')':'')):'Plus/moins-value : renseigne PRU et cours';
@@ -99,6 +99,11 @@ function render(){
   const root=$('#sections');root.textContent='';
   for(const sec of SECTIONS)root.appendChild(renderSection(sec));
 }
+function gainPill(p){ // same figures as the envelope cards; nothing without PRU (savings, crypto without PRU)
+  if(p.sec.type==='sav'||!isFinite(p.pnl)||!(p.cost>0))return el('span',{class:'lg-g none'});
+  const r=p.pnl/p.cost*100;const c=cls(p.pnl);
+  return el('span',{class:'lg-g pill amt '+c,title:'Plus/moins-value : '+signed(p.pnl)},(c==='pos'?'▲ +':c==='neg'?'▼ −':'')+Math.abs(r).toFixed(1).replace('.',',')+' %');
+}
 function drawDonut(parts,total){
   const svg=$('#donut');svg.textContent='';const NS='http://www.w3.org/2000/svg';const R=48,C=2*Math.PI*R;
   const mk=(t,a)=>{const e=document.createElementNS(NS,t);for(const k in a)e.setAttribute(k,a[k]);return e;};
@@ -109,7 +114,7 @@ function drawDonut(parts,total){
   const t1=mk('text',{x:60,y:56,'text-anchor':'middle',class:'c-lbl'});t1.textContent='Enveloppes';svg.appendChild(t1);
   const t2=mk('text',{x:60,y:71,'text-anchor':'middle',class:'c-val'});t2.textContent=String(parts.filter(p=>p.v>0).length);svg.appendChild(t2);
   const lg=$('#legend');lg.textContent='';
-  for(const p of parts){const li=el('li',null,el('span',{class:'dot'}),el('span',{class:'nm',text:p.sec.name}),el('span',{class:'pc',text:total>0?(p.v/total*100).toFixed(1).replace('.',',')+' %':'—'}),el('span',{class:'vl amt',text:eur(p.v)}));
+  for(const p of parts){const li=el('li',null,el('span',{class:'dot'}),el('span',{class:'nm',text:p.sec.name}),el('span',{class:'pc',text:total>0?(p.v/total*100).toFixed(1).replace('.',',')+' %':'—'}),gainPill(p),el('span',{class:'vl amt',text:eur(p.v)}));
     li.style.setProperty('--c',p.sec.color);lg.appendChild(li);}
 }
 function renderSection(sec){
