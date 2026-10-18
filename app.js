@@ -245,6 +245,28 @@ async function refreshCrypto(quiet){
 function today(){return new Date().toISOString().slice(0,10);}
 function tdBudget(n){const u=S.settings.tdUse||{};if(u.d!==today()){u.d=today();u.n=0;}
   if(u.n+n>700)return false;u.n+=n;S.settings.tdUse=u;return true;}
+const TD_CALLS='pfdash.tdcalls',TD_GAP=31e3,TD_PER_MIN=2,TD_EVERY=4.5*60e3;
+function tdGuard(){ // shared by every open tab through localStorage
+  const now=Date.now();let c=[];try{c=JSON.parse(localStorage.getItem(TD_CALLS)||'[]').filter(t=>now-t<60e3);}catch(e){c=[];}
+  if(c.length>=TD_PER_MIN||(c.length&&now-Math.max(...c)<TD_GAP))return false;
+  c.push(now);try{localStorage.setItem(TD_CALLS,JSON.stringify(c));}catch(e){}return true;
+}
+function tdDue(lines,manual){const at=S.settings.tdSymAt||{};const now=Date.now();
+  return [...new Set(lines.filter(l=>l.apiSym).map(l=>l.apiSym.trim()))].filter(s=>manual||now-(at[s]||0)>TD_EVERY).sort((x,y)=>(at[x]||0)-(at[y]||0));}
+async function tdOne(sym,lines,key,now){
+  if(!tdGuard()||!tdBudget(1))return null;
+  S.settings.tdSymAt=Object.assign({},S.settings.tdSymAt,{[sym]:now});
+  try{const r=await getJSON('https://api.twelvedata.com/quote?apikey='+encodeURIComponent(key)+'&symbol='+encodeURIComponent(sym));
+    const p=r&&!r.code&&num(r.close);if(!isFinite(p))return [];const out=[];
+    for(const l of lines)if(l.apiSym&&l.apiSym.trim()===sym){l.price=p;l.chg=isFinite(num(r.percent_change))?num(r.percent_change):null;l.priceAt=now;l.priceSrc='auto';l.via='Twelve Data';l.autoFail=false;out.push(l);}
+    return out;}catch(e){return [];}
+}
+let tdTimer=null;
+function tdSchedule(){if(tdTimer)return;tdTimer=setTimeout(async()=>{tdTimer=null;
+  const key=(S.settings.apiKey||'').trim();if(S.settings.provider!=='twelvedata'||!key)return;
+  const lines=[...S.pea,...S.cto].filter(l=>l.src!=='manuel'&&l.apiSym);const syms=tdDue(lines,false);if(!syms.length)return;
+  const r=await tdOne(syms[0],lines,key,Date.now());if(r&&r.length){S.stocksAt=Date.now();save();render();}
+  if(syms.length>1||!r)tdSchedule();},TD_GAP+500);}
 async function onvista(l){
   const types=l.ovType?[l.ovType]:['FUND','STOCK'];let d=null;
   for(const t of types){try{d=await getJSON('https://api.onvista.de/api/v1/instruments/'+t+'/ISIN:'+encodeURIComponent(l.isin)+'/snapshot');l.ovType=t;break;}catch(e){d=null;}}
@@ -260,18 +282,12 @@ async function refreshStocks(manual){
   const lines=[...S.pea,...S.cto].filter(l=>l.src!=='manuel'&&(l.apiSym||l.isin));if(!lines.length)return null;
   const prov=S.settings.provider,key=(S.settings.apiKey||'').trim();const now=Date.now();const done=new Set();
   const setP=(l,r)=>{l.price=r.price;l.chg=isFinite(r.chg)?r.chg:null;l.priceAt=now;l.priceSrc='auto';l.via=r.via;l.autoFail=false;done.add(l);};
-  // 1) Twelve Data (free plan: US markets; 8 credits/min, 800/day) — one batched /quote call, max 8 symbols
-  if(prov==='twelvedata'&&key&&(manual||now-(S.settings.tdAt||0)>4.5*60e3)){
-    const syms=[...new Set(lines.filter(l=>l.apiSym).map(l=>l.apiSym.trim()))].slice(0,8);
-    if(syms.length&&tdBudget(syms.length)){
-      S.settings.tdAt=now;
-      try{const d=await getJSON('https://api.twelvedata.com/quote?apikey='+encodeURIComponent(key)+'&symbol='+syms.map(encodeURIComponent).join(','));
-        const get=x=>syms.length===1?d:d[x];
-        for(const l of lines){if(!l.apiSym)continue;const r=get(l.apiSym.trim());const p=r&&!r.code&&num(r.close);
-          if(isFinite(p))setP(l,{price:p,chg:num(r.percent_change),via:'Twelve Data'});}
-      }catch(e){}
-    }else if(syms.length){for(const l of lines)if(l.apiSym&&l.via==='Twelve Data')done.add(l);} // budget reached: keep last
-  }else if(prov==='twelvedata'&&key){for(const l of lines)if(l.apiSym&&l.via==='Twelve Data'&&!l.autoFail)done.add(l);} // throttled: keep recent
+  // 1) Twelve Data (free plan 8 credits/min): ONE symbol per call, >=30 s apart, max 2 calls/min across all tabs, each symbol <= every 4.5 min
+  if(prov==='twelvedata'&&key){
+    const syms=tdDue(lines,manual);
+    if(syms.length){const r=await tdOne(syms[0],lines,key,now);if(r)for(const l of r)done.add(l);if(syms.length>1)tdSchedule();}
+    for(const l of lines)if(l.apiSym&&l.via==='Twelve Data'&&!l.autoFail&&!done.has(l))done.add(l); // keep last TD quote until its turn
+  }
   // 2) Alpha Vantage (optional)
   if(prov==='alphavantage'&&key){for(const l of lines){if(!l.apiSym||done.has(l))continue;
     try{const d=await getJSON('https://www.alphavantage.co/query?function=GLOBAL_QUOTE&symbol='+encodeURIComponent(l.apiSym)+'&apikey='+encodeURIComponent(key));
