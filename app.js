@@ -166,6 +166,18 @@ function drawDonut(parts,total){
   for(const p of parts){const li=el('li',null,el('span',{class:'dot'}),el('span',{class:'nm',text:p.sec.name}),el('span',{class:'pc',text:total>0?(p.v/total*100).toFixed(1).replace('.',',')+' %':'—'}),gainPill(p),el('span',{class:'vl amt',text:eur(p.v)}));
     li.style.setProperty('--c',p.sec.color);lg.appendChild(li);}
 }
+// dual EUR / USD display (CTO + Crypto only), using the app's live EUR/USD rate (frankfurter, cached in S.fx)
+const DUAL=new Set(['cto','crypto']);
+function isDual(sec){return !!sec&&DUAL.has(sec.k);}
+function toUsd(e){const r=fx('USD');return isFinite(e)&&isFinite(r)&&r>0?e/r:NaN;}
+function usdS(n){return isFinite(n)?money(n,'USD'):'—';}
+function sUsd(n){return isFinite(n)?(n>=0?'+':'−')+money(Math.abs(n),'USD'):'';}
+function lineUsd(sec,l,v){const c=(l.cur||'EUR').toUpperCase();const q=num(l.qty)||0,p=num(l.price),pru=num(l.pru);
+  if(sec.type!=='cry'&&c==='USD'){const r=fx('USD'); // native USD line: exact $ figures, € alongside for price/PRU
+    return {value:isFinite(p)?q*p:(isFinite(pru)?q*pru:0),pnl:isFinite(p)&&isFinite(pru)?q*(p-pru):NaN,alt:[isFinite(p)&&isFinite(r)?'cours '+eur(p*r):null,isFinite(pru)&&isFinite(r)?'PRU '+eur(pru*r):null]};}
+  const k=sec.type==='cry'?1:fx(c);
+  return {value:toUsd(v.value),pnl:toUsd(v.pnl),alt:[isFinite(p)?'cours '+usdS(toUsd(p*k)):null,isFinite(pru)?'PRU '+usdS(toUsd(pru*k)):null]};}
+function usdEl(n,signed,extra){const t=signed?sUsd(n):usdS(n);return t&&t!=='—'?el('div',{class:'usd amt'+(extra?' '+extra:''),text:t}):null;}
 function totBlock(v){return el('div',{class:'sec-tot'},el('div',{class:'v amt',text:eur(v.value)}),
   isFinite(v.pnl)?el('div',{class:'pl'},v.cost>0?el('span',{class:'pill amt '+cls(v.pnl),text:pct(v.pnl/v.cost*100)}):null,el('span',{class:'pe amt '+cls(v.pnl),text:signed(v.pnl)})):null,
   v.offN?el('div',{class:'p mut amt',text:'+ '+eur(v.off)+' hors total'}):null);}
@@ -190,7 +202,7 @@ function renderSection(sec,isSub){
   const head=el('div',{class:'sec-head',role:'button',tabindex:'0','aria-expanded':String(!collapsed),'aria-controls':'body-'+sec.k,onclick:toggle,onkeydown:e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();toggle();}}},
     el('div',{class:'sec-title'},el('span',{class:'bar'}),el('div',null,el('div',{text:sec.name}),el('div',{class:'sec-sub',text:sub}))),
     el('div',{class:'sec-right'},
-      el('div',{class:'sec-tot'},el('div',{class:'v amt',text:eur(v.value)}),
+      el('div',{class:'sec-tot'},el('div',{class:'v amt',text:eur(v.value)}),isDual(sec)?usdEl(toUsd(v.value),false,'usd-tot'):null,
         isFinite(v.pnl)?el('div',{class:'pl'},v.cost>0?el('span',{class:'pill amt '+cls(v.pnl),text:pct(v.pnl/v.cost*100)}):null,el('span',{class:'pe amt '+cls(v.pnl),text:signed(v.pnl)})):null,
         v.offN?el('div',{class:'p mut amt',text:'+ '+eur(v.off)+' hors total'}):null),
       el('span',{class:'chev','aria-hidden':'true'})));
@@ -213,7 +225,7 @@ function cashRow(sec){
   const open=()=>{if(VIEW)return;editing[sec.k]='cash';render();focusFirst(sec.k);};
   return el('div',{class:'ln cash',tabindex:VIEW?null:'0',role:VIEW?null:'button',title:VIEW?null:'Modifier les fonds disponibles',onclick:open,onkeydown:e=>{if(e.key==='Enter')open();}},
     el('div',{class:'a'},el('span',{class:'wal','aria-hidden':'true'},'👛'),el('span',{class:'ct'},'Fonds disponibles non investis')),
-    el('div',{class:'r'},el('div',{class:'v amt',text:eur(v)})),
+    el('div',{class:'r'},el('div',{class:'v amt',text:eur(v)}),isDual(sec)&&v?usdEl(usd?n:toUsd(v)):null),
     el('div',{class:'b amt',text:(usd?money(n,'USD')+' · ':'')+'Liquidités · hors plus/moins-value'}),
     el('div',{class:'r'}));
 }
@@ -254,12 +266,14 @@ function lineRow(sec,l){
     else tags.push(el('span',{class:'tag off',text:'manuel'}));
     if(v.fxMissing)tags.push(el('span',{class:'tag',text:'change ?'}));
   }
-  return el('div',{class:'ln'+(sec.type==='sav'&&l.inTotal===false?' off':''),tabindex:VIEW?null:'0',role:VIEW?null:'button',onclick:VIEW?null:()=>{editing[sec.k]=l.id;render();focusFirst(sec.k);},onkeydown:VIEW?null:e=>{if(e.key==='Enter'){editing[sec.k]=l.id;render();focusFirst(sec.k);}}},
+  const U=isDual(sec)?lineUsd(sec,l,v):null;
+  return el('div',{class:'ln'+(sec.type==='sav'&&l.inTotal===false?' off':'')+(U?' dual':''),tabindex:VIEW?null:'0',role:VIEW?null:'button',onclick:VIEW?null:()=>{editing[sec.k]=l.id;render();focusFirst(sec.k);},onkeydown:VIEW?null:e=>{if(e.key==='Enter'){editing[sec.k]=l.id;render();focusFirst(sec.k);}}},
     el('div',{class:'a'},sec.type==='sav'?el('input',{type:'checkbox',class:'tot-cb',title:'Compte dans le total','aria-label':'Compte dans le total',checked:l.inTotal!==false,disabled:VIEW,
       onclick:e=>{e.stopPropagation();if(VIEW){e.preventDefault();return;}l.inTotal=e.target.checked;touch();save();render();},onkeydown:e=>e.stopPropagation()}):null,a,...tags),
-    el('div',{class:'r'},el('div',{class:'v amt',text:eur(v.value)})),
+    el('div',{class:'r'},el('div',{class:'v amt',text:eur(v.value)}),U?usdEl(U.value):null),
     el('div',{class:'b amt',text:b}),
-    el('div',{class:'r'},isFinite(v.pnl)?el('div',{class:'p amt '+cls(v.pnl),text:signed(v.pnl)+(v.cost>0?' '+pct(v.pnl/v.cost*100):'')}):el('div',{class:'p',text:''})));
+    el('div',{class:'r'},isFinite(v.pnl)?el('div',{class:'p amt '+cls(v.pnl),text:signed(v.pnl)+(v.cost>0?' '+pct(v.pnl/v.cost*100):'')}):el('div',{class:'p',text:''}),U&&isFinite(U.pnl)?usdEl(U.pnl,true,cls(U.pnl)):null),
+    U&&U.alt.some(Boolean)?el('div',{class:'b2 amt',text:'≈ '+U.alt.filter(Boolean).join(' · ')}):null);
 }
 function inp(name,label,val,opts={}){
   const i=el('input',{name,value:val===undefined||val===null?'':String(val),placeholder:opts.ph||'',inputmode:opts.num?'decimal':null,autocomplete:'off',spellcheck:'false',type:opts.type||'text'});
