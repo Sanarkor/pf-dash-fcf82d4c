@@ -121,7 +121,7 @@ function renderSection(sec){
     el('div',{class:'sec-title'},el('span',{class:'bar'}),el('div',null,el('div',{text:sec.name}),el('div',{class:'sec-sub',text:sub}))),
     el('div',{class:'sec-right'},
       el('div',{class:'sec-tot'},el('div',{class:'v amt',text:eur(v.value)}),
-        isFinite(v.pnl)?el('div',{class:'p amt '+cls(v.pnl),text:signed(v.pnl)+(v.cost>0?' ('+pct(v.pnl/v.cost*100)+')':'')}):null,
+        isFinite(v.pnl)?el('div',{class:'pl'},v.cost>0?el('span',{class:'pill amt '+cls(v.pnl),text:pct(v.pnl/v.cost*100)}):null,el('span',{class:'pe amt '+cls(v.pnl),text:signed(v.pnl)})):null,
         v.offN?el('div',{class:'p mut amt',text:'+ '+eur(v.off)+' hors total'}):null),
       el('span',{class:'chev','aria-hidden':'true'})));
   card.appendChild(head);
