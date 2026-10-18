@@ -1,0 +1,301 @@
+{
+ "v": 2,
+ "demo": false,
+ "pea": [
+  {
+   "id": "cb68oojb5zg3",
+   "ticker": "STM",
+   "name": "STMicroelectronics",
+   "qty": 9,
+   "pru": 57.878,
+   "cur": "EUR",
+   "apiSym": "",
+   "price": 41.17,
+   "isin": "NL0000226223",
+   "mkt": "_PAR",
+   "src": "auto",
+   "ovType": "STOCK",
+   "chg": -0.5796,
+   "priceAt": 1792320684868,
+   "priceSrc": "auto",
+   "via": "onvista Paris",
+   "autoFail": false
+  },
+  {
+   "id": "82jysi2r36hu",
+   "ticker": "DCAM",
+   "name": "Amundi PEA Monde (MSCI World)",
+   "qty": 200,
+   "pru": 6.046,
+   "cur": "EUR",
+   "apiSym": "",
+   "price": 6.334,
+   "isin": "FR001400U5Q4",
+   "mkt": "_PAR",
+   "src": "auto",
+   "ovType": "FUND",
+   "chg": -0.1419,
+   "priceAt": 1792320684868,
+   "priceSrc": "auto",
+   "via": "onvista Paris",
+   "autoFail": false
+  },
+  {
+   "id": "e34mnh3cgjd7",
+   "ticker": "PAASI",
+   "name": "Amundi PEA Asie Émergente",
+   "qty": 21,
+   "pru": 39.791,
+   "cur": "EUR",
+   "apiSym": "",
+   "price": 37.755,
+   "isin": "FR0013412012",
+   "mkt": "_PAR",
+   "src": "auto",
+   "ovType": "FUND",
+   "chg": -1.0484,
+   "priceAt": 1792320684868,
+   "priceSrc": "auto",
+   "via": "onvista Paris",
+   "autoFail": false
+  },
+  {
+   "id": "hqha0ld2otsa",
+   "ticker": "CW8",
+   "name": "Amundi MSCI World Swap",
+   "qty": 1,
+   "pru": 677.56,
+   "cur": "EUR",
+   "apiSym": "",
+   "price": 709.55,
+   "isin": "LU1681043599",
+   "mkt": "_PAR",
+   "src": "auto",
+   "ovType": "FUND",
+   "chg": -0.1379,
+   "priceAt": 1792320684868,
+   "priceSrc": "auto",
+   "via": "onvista Paris",
+   "autoFail": false
+  },
+  {
+   "id": "qlqcpdfr69nf",
+   "ticker": "PUST",
+   "name": "Amundi PEA Nasdaq-100",
+   "qty": 4,
+   "pru": 105.028,
+   "cur": "EUR",
+   "apiSym": "",
+   "price": 105.34,
+   "isin": "FR0011871110",
+   "mkt": "_PAR",
+   "src": "auto",
+   "ovType": "FUND",
+   "chg": -1.1449,
+   "priceAt": 1792320684868,
+   "priceSrc": "auto",
+   "via": "onvista Paris",
+   "autoFail": false
+  }
+ ],
+ "cto": [
+  {
+   "id": "7weajvf97m5k",
+   "ticker": "IONQ",
+   "name": "IonQ",
+   "qty": 15,
+   "pru": 36.49,
+   "cur": "USD",
+   "apiSym": "IONQ",
+   "price": 31.28,
+   "isin": "US46222L1089",
+   "mkt": "_NYS",
+   "src": "auto",
+   "ovType": "STOCK",
+   "chg": -8.9374,
+   "priceAt": 1792320668281,
+   "priceSrc": "auto",
+   "via": "Twelve Data",
+   "autoFail": false
+  },
+  {
+   "id": "rxr69867za4u",
+   "ticker": "SPCX",
+   "name": "SpaceX",
+   "qty": 3,
+   "pru": 154,
+   "cur": "USD",
+   "apiSym": "SPCX",
+   "price": 146.029999,
+   "isin": "US84615Q1031",
+   "mkt": "_NMS",
+   "src": "auto",
+   "ovType": "STOCK",
+   "chg": -1.7427,
+   "priceAt": 1792320700279,
+   "priceSrc": "auto",
+   "via": "Twelve Data",
+   "autoFail": false
+  }
+ ],
+ "savings": [
+  {
+   "id": "e75394367192",
+   "label": "Livret A",
+   "inst": "La Banque Postale",
+   "amount": 25000,
+   "rate": null,
+   "note": "Plafond atteint, intérêts compensés",
+   "capped": true,
+   "inTotal": true
+  },
+  {
+   "id": "fb72d01cd0c6",
+   "label": "LDDS",
+   "inst": "La Banque Postale",
+   "amount": 12900,
+   "rate": null,
+   "note": "",
+   "capped": false,
+   "inTotal": true
+  },
+  {
+   "id": "63a615851b95",
+   "label": "Épargne Revolut",
+   "inst": "Revolut",
+   "amount": 0,
+   "rate": null,
+   "note": "",
+   "capped": false,
+   "inTotal": true
+  },
+  {
+   "id": "8a4b084d2066",
+   "label": "Mel – LEP",
+   "inst": "Mel",
+   "amount": 9000,
+   "rate": null,
+   "note": "",
+   "capped": false,
+   "inTotal": false
+  },
+  {
+   "id": "a5130a3ea73f",
+   "label": "Capy",
+   "inst": "Capy",
+   "amount": 3190.06,
+   "rate": null,
+   "note": "",
+   "capped": false,
+   "inTotal": false
+  },
+  {
+   "id": "2dd092451dc8",
+   "label": "Chèvra",
+   "inst": "Chèvra",
+   "amount": 2487.36,
+   "rate": null,
+   "note": "",
+   "capped": false,
+   "inTotal": false
+  }
+ ],
+ "crypto": [
+  {
+   "id": "2bz82qbhx5uf",
+   "sym": "BTC",
+   "qty": 0.026,
+   "pru": null,
+   "cgId": "bitcoin",
+   "price": 73024,
+   "priceAt": 1792320684868,
+   "priceSrc": "auto"
+  },
+  {
+   "id": "i0i8wnan7qe1",
+   "sym": "ETH",
+   "qty": 0.34,
+   "pru": null,
+   "cgId": "ethereum",
+   "price": 2151.79,
+   "priceAt": 1792320684868,
+   "priceSrc": "auto"
+  },
+  {
+   "id": "ezbdigdc61wn",
+   "sym": "DOGE",
+   "qty": 2139.89,
+   "pru": null,
+   "cgId": "dogecoin",
+   "price": 0.070599,
+   "priceAt": 1792320684868,
+   "priceSrc": "auto"
+  },
+  {
+   "id": "5f56ekyst60c",
+   "sym": "SOL",
+   "qty": 1.35,
+   "pru": null,
+   "cgId": "solana",
+   "price": 92.52,
+   "priceAt": 1792320684868,
+   "priceSrc": "auto"
+  },
+  {
+   "id": "qjtykly7vnma",
+   "sym": "HYPE",
+   "qty": 0.96,
+   "pru": null,
+   "cgId": "hyperliquid",
+   "price": 70.31,
+   "priceAt": 1792320684868,
+   "priceSrc": "auto"
+  },
+  {
+   "id": "xfvvvlwyhi8t",
+   "sym": "ATH",
+   "qty": 7896.8,
+   "pru": null,
+   "cgId": "aethir",
+   "price": 0.00485116,
+   "priceAt": 1792320684868,
+   "priceSrc": "auto"
+  },
+  {
+   "id": "unh3p4wznwtz",
+   "sym": "TON",
+   "qty": 8.76,
+   "pru": null,
+   "cgId": "the-open-network",
+   "price": 1.2,
+   "priceAt": 1792320684868,
+   "priceSrc": "auto"
+  },
+  {
+   "id": "cok17kr925mp",
+   "sym": "DOGS",
+   "qty": 209970,
+   "pru": null,
+   "cgId": "dogs-2",
+   "price": 0.00003406,
+   "priceAt": 1792320684868,
+   "priceSrc": "auto"
+  }
+ ],
+ "settings": {
+  "provider": "twelvedata"
+ },
+ "fx": {
+  "rates": {
+   "EUR": 1,
+   "USD": 0.888651915044877
+  },
+  "at": 1792320684865,
+  "src": "frankfurter (2026-10-16)"
+ },
+ "cryptoAt": 1792320684868,
+ "stocksAt": 1792320700503,
+ "updatedAt": 1792320828238,
+ "app": "pf-dash",
+ "savedAt": "2026-10-18T10:53:48.238Z"
+}
