@@ -88,7 +88,7 @@ function render(){
   const tpEl=$('#totalPnl');tpEl.className='pnl amt '+(hp?cls(tp):'mut');
   tpEl.textContent=hp?('Plus/moins-value latente : '+signed(tp)+(tc>0?'  ('+pct(tp/tc*100)+')':'')):'Plus/moins-value : renseigne PRU et cours';
   const st=[];st.push('Crypto : '+ago(S.cryptoAt));st.push('Change : '+(S.fx.at?ago(S.fx.at):'—'));
-  st.push('Actions : '+(S.settings.provider==='none'?'manuel':ago(S.stocksAt)));$('#status').textContent=st.join(' · ');
+  st.push('Actions : '+(S.stocksAt?ago(S.stocksAt):'manuel'));$('#status').textContent=st.join(' · ');
   drawDonut(parts,total);
   const any=SECTIONS.some(s=>S[s.k].length);$('#empty').classList.toggle('hidden',any);
   const root=$('#sections');root.textContent='';
@@ -147,8 +147,14 @@ function lineRow(sec,l){
   }else{
     a=(l.ticker||'?')+(l.name?' · '+l.name:'');const c=(l.cur||'EUR').toUpperCase();
     const bits=[qtyf(num(l.qty))+' × '+(isFinite(num(l.price))?money(num(l.price),c):'—'),'PRU '+money(num(l.pru),c)];
-    if(l.priceAt)bits.push((l.priceSrc==='auto'?'auto ':'saisi ')+ago(l.priceAt));b=bits.join(' · ');
-    if(v.missing)tags.push(el('span',{class:'tag',text:'cours manquant'}));if(v.fxMissing)tags.push(el('span',{class:'tag',text:'change ?'}));
+    if(isFinite(num(l.chg))&&l.priceSrc==='auto'&&!l.autoFail)bits.push('jour '+pct(num(l.chg)));
+    if(l.priceAt)bits.push((l.autoFail?'dernier ':'')+(l.priceSrc==='auto'?(l.via||'auto')+' ':'saisi ')+ago(l.priceAt));b=bits.join(' · ');
+    const wantsAuto=l.src!=='manuel'&&(l.isin||l.apiSym);
+    if(v.missing)tags.push(el('span',{class:'tag',text:'cours manquant'}));
+    else if(wantsAuto&&!l.autoFail&&l.priceSrc==='auto')tags.push(el('span',{class:'tag ok',text:'live'}));
+    else if(wantsAuto&&l.autoFail)tags.push(el('span',{class:'tag',text:'auto ✗ · cours manuel',title:'Source automatique indisponible : dernier cours connu / saisi utilisé'}));
+    else tags.push(el('span',{class:'tag off',text:'manuel'}));
+    if(v.fxMissing)tags.push(el('span',{class:'tag',text:'change ?'}));
   }
   return el('div',{class:'ln'+(sec.type==='sav'&&l.inTotal===false?' off':''),tabindex:'0',role:'button',onclick:()=>{editing[sec.k]=l.id;render();focusFirst(sec.k);},onkeydown:e=>{if(e.key==='Enter'){editing[sec.k]=l.id;render();focusFirst(sec.k);}}},
     el('div',{class:'a'},sec.type==='sav'?el('input',{type:'checkbox',class:'tot-cb',title:'Compte dans le total','aria-label':'Compte dans le total',checked:l.inTotal!==false,
@@ -175,8 +181,11 @@ function editForm(sec,l){
       inp('cgId','ID CoinGecko (auto)',l.cgId,{ph:CG_MAP[(l.sym||'').toUpperCase()]||'auto'}),inp('price','Cours € (auto / manuel)',l.price,{num:1,full:1}));
   }else{
     const cur=el('select',{name:'cur'},...CURS.map(c=>{const o=el('option',{value:c,text:c});if((l.cur||(sec.k==='cto'?'USD':'EUR'))===c)o.selected=true;return o;}));
-    f.append(inp('ticker','Ticker / ISIN',l.ticker,{ph:'ex. CW8'}),inp('name','Nom (facultatif)',l.name),inp('qty','Quantité',l.qty,{num:1}),inp('pru','PRU',l.pru,{num:1}),
-      el('label',null,'Devise',cur),inp('price','Dernier cours',l.price,{num:1}),inp('apiSym','Symbole API (facultatif)',l.apiSym,{ph:'ex. CW8:EURONEXT'}));
+    const src=el('select',{name:'src'},...[['auto','Automatique'],['manuel','Manuel uniquement']].map(([v,t])=>{const o=el('option',{value:v,text:t});if((l.src||'auto')===v)o.selected=true;return o;}));
+    f.append(inp('ticker','Ticker',l.ticker,{ph:'ex. CW8'}),inp('name','Nom (facultatif)',l.name),inp('qty','Quantité',l.qty,{num:1}),inp('pru','PRU',l.pru,{num:1}),
+      el('label',null,'Devise',cur),inp('price','Dernier cours (secours)',l.price,{num:1}),el('label',null,'Cours',src),
+      inp('isin','ISIN (cours auto sans clé)',l.isin,{ph:'ex. FR0011871110'}),inp('apiSym','Symbole Twelve Data / AV',l.apiSym,{ph:'ex. IONQ'}),
+      inp('mkt','Place onvista (facultatif)',l.mkt,{ph:'_PAR, _NYS, _NAS…'}));
   }
   const btns=el('div',{class:'btns'});
   if(!isNew)btns.append(el('button',{type:'button',class:'danger',onclick:()=>{if(confirm('Supprimer cette ligne ?')){S[sec.k]=S[sec.k].filter(x=>x.id!==l.id);delete editing[sec.k];save();render();}}},'Supprimer'));
@@ -192,10 +201,11 @@ function commit(sec,id,fd,form){
     o={label:g('label')||'Compte',inst:g('inst'),amount:n('amount')??0,rate:n('rate'),note:g('note'),capped:!!form.querySelector('[name=capped]')?.checked,inTotal:!!form.querySelector('[name=inTotal]')?.checked};}
   else if(sec.type==='cry'){if(!g('sym')){toast('Symbole requis');return;}o={sym:g('sym').toUpperCase(),qty:n('qty')??0,pru:n('pru'),cgId:g('cgId').toLowerCase()};
     const p=n('price');o.price=p;}
-  else{if(!g('ticker')){toast('Ticker requis');return;}o={ticker:g('ticker').toUpperCase(),name:g('name'),qty:n('qty')??0,pru:n('pru'),cur:g('cur')||'EUR',apiSym:g('apiSym')};o.price=n('price');}
+  else{if(!g('ticker')){toast('Ticker requis');return;}o={ticker:g('ticker').toUpperCase(),name:g('name'),qty:n('qty')??0,pru:n('pru'),cur:g('cur')||'EUR',apiSym:g('apiSym'),isin:g('isin').toUpperCase(),mkt:g('mkt'),src:g('src')||'auto'};o.price=n('price');
+    const ex0=S[sec.k].find(x=>x.id===id);if(ex0&&(ex0.isin!==o.isin))o.ovType='';}
   const arr=S[sec.k];const ex=arr.find(x=>x.id===id);
   if(ex){
-    if(sec.type!=='sav'&&o.price!==ex.price){o.priceAt=o.price===null?0:Date.now();o.priceSrc='manuel';}
+    if(sec.type!=='sav'&&o.price!==ex.price){o.priceAt=o.price===null?0:Date.now();o.priceSrc='manuel';o.chg=null;}
     if(sec.type==='cry'&&o.sym!==ex.sym&&!g('cgId'))o.cgId='';
     Object.assign(ex,o);
   }else{o.id=uid();if(sec.type!=='sav'&&o.price!==null){o.priceAt=Date.now();o.priceSrc='manuel';}arr.push(o);}
@@ -227,23 +237,43 @@ async function refreshCrypto(quiet){
     S.cryptoAt=now;save();if(quiet)render();return true;}
   catch(e){if(!quiet)toast('CoinGecko indisponible (limite de requêtes ?)');return false;}
 }
-async function refreshStocks(){
-  const prov=S.settings.provider,key=(S.settings.apiKey||'').trim();if(prov==='none'||!key)return null;
-  const lines=[...S.pea,...S.cto].filter(l=>l.apiSym||l.ticker);if(!lines.length)return null;
-  const symOf=l=>(l.apiSym||l.ticker).trim();let ok=0,fail=0;const now=Date.now();
-  if(prov==='twelvedata'){
-    const syms=[...new Set(lines.map(symOf))];
-    try{const d=await getJSON('https://api.twelvedata.com/price?apikey='+encodeURIComponent(key)+'&symbol='+syms.map(encodeURIComponent).join(','));
-      const get=s=>syms.length===1?d:d[s];
-      for(const l of lines){const r=get(symOf(l));const p=r&&num(r.price);if(isFinite(p)){l.price=p;l.priceAt=now;l.priceSrc='auto';ok++;}else fail++;}
-    }catch(e){fail=lines.length;}
-  }else if(prov==='alphavantage'){
-    const cache={};
-    for(const l of lines){const s=symOf(l);
-      if(!(s in cache)){try{const d=await getJSON('https://www.alphavantage.co/query?function=GLOBAL_QUOTE&symbol='+encodeURIComponent(s)+'&apikey='+encodeURIComponent(key));
-        cache[s]=num(d['Global Quote']&&d['Global Quote']['05. price']);}catch(e){cache[s]=NaN;}}
-      if(isFinite(cache[s])){l.price=cache[s];l.priceAt=now;l.priceSrc='auto';ok++;}else fail++;}
-  }
+function today(){return new Date().toISOString().slice(0,10);}
+function tdBudget(n){const u=S.settings.tdUse||{};if(u.d!==today()){u.d=today();u.n=0;}
+  if(u.n+n>700)return false;u.n+=n;S.settings.tdUse=u;return true;}
+async function onvista(l){
+  const types=l.ovType?[l.ovType]:['FUND','STOCK'];let d=null;
+  for(const t of types){try{d=await getJSON('https://api.onvista.de/api/v1/instruments/'+t+'/ISIN:'+encodeURIComponent(l.isin)+'/snapshot');l.ovType=t;break;}catch(e){d=null;}}
+  if(!d)return null;
+  const list=(d.quoteList&&d.quoteList.list)||[];const cur=(l.cur||'EUR').toUpperCase();
+  const pref=[l.mkt,'_PAR','_NMS','_NAS','_NYS','_GER','_AMS','_BRU','_MIL'].filter(Boolean);
+  let q=null;for(const m of pref){q=list.find(x=>x.market&&x.market.codeMarket===m&&x.isoCurrency===cur);if(q)break;}
+  if(!q)q=list.find(x=>x.isoCurrency===cur);
+  if(!q||!isFinite(num(q.last)))return null;
+  return {price:num(q.last),chg:num(q.performancePct),via:'onvista '+((q.market&&q.market.name)||'')};
+}
+async function refreshStocks(manual){
+  const lines=[...S.pea,...S.cto].filter(l=>l.src!=='manuel'&&(l.apiSym||l.isin));if(!lines.length)return null;
+  const prov=S.settings.provider,key=(S.settings.apiKey||'').trim();const now=Date.now();const done=new Set();
+  const setP=(l,r)=>{l.price=r.price;l.chg=isFinite(r.chg)?r.chg:null;l.priceAt=now;l.priceSrc='auto';l.via=r.via;l.autoFail=false;done.add(l);};
+  // 1) Twelve Data (free plan: US markets; 8 credits/min, 800/day) — one batched /quote call, max 8 symbols
+  if(prov==='twelvedata'&&key&&(manual||now-(S.settings.tdAt||0)>4.5*60e3)){
+    const syms=[...new Set(lines.filter(l=>l.apiSym).map(l=>l.apiSym.trim()))].slice(0,8);
+    if(syms.length&&tdBudget(syms.length)){
+      S.settings.tdAt=now;
+      try{const d=await getJSON('https://api.twelvedata.com/quote?apikey='+encodeURIComponent(key)+'&symbol='+syms.map(encodeURIComponent).join(','));
+        const get=x=>syms.length===1?d:d[x];
+        for(const l of lines){if(!l.apiSym)continue;const r=get(l.apiSym.trim());const p=r&&!r.code&&num(r.close);
+          if(isFinite(p))setP(l,{price:p,chg:num(r.percent_change),via:'Twelve Data'});}
+      }catch(e){}
+    }else if(syms.length){for(const l of lines)if(l.apiSym&&l.via==='Twelve Data')done.add(l);} // budget reached: keep last
+  }else if(prov==='twelvedata'&&key){for(const l of lines)if(l.apiSym&&l.via==='Twelve Data'&&!l.autoFail)done.add(l);} // throttled: keep recent
+  // 2) Alpha Vantage (optional)
+  if(prov==='alphavantage'&&key){for(const l of lines){if(!l.apiSym||done.has(l))continue;
+    try{const d=await getJSON('https://www.alphavantage.co/query?function=GLOBAL_QUOTE&symbol='+encodeURIComponent(l.apiSym)+'&apikey='+encodeURIComponent(key));
+      const g=d['Global Quote'];const p=g&&num(g['05. price']);if(isFinite(p))setP(l,{price:p,chg:num(String(g['10. change percent']||'').replace('%','')),via:'Alpha Vantage'});}catch(e){}}}
+  // 3) onvista (keyless, CORS) by ISIN — covers Euronext Paris and fallback
+  for(const l of lines){if(done.has(l)||!l.isin)continue;try{const r=await onvista(l);if(r)setP(l,r);}catch(e){}}
+  let ok=0,fail=0;for(const l of lines){if(done.has(l))ok++;else{l.autoFail=true;fail++;}}
   if(ok)S.stocksAt=now;return {ok,fail};
 }
 let busy=false;
@@ -252,8 +282,8 @@ async function refreshAll(manual){
   const msgs=[];
   const fxOk=await refreshFx();if(!fxOk)msgs.push('change indisponible');
   const cOk=await refreshCrypto(false);if(!cOk)msgs.push('crypto indisponible');
-  let st=null;if(manual||Date.now()-S.stocksAt>3600e3)st=await refreshStocks();
-  if(st&&st.fail)msgs.push(st.fail+' cours action non trouvé(s)');
+  const st=await refreshStocks(manual);
+  if(st&&st.fail)msgs.push(st.fail+' cours action en manuel');
   save();render();busy=false;$('#btnRefresh').classList.remove('spin');
   if(manual)toast(msgs.length?'Actualisé — '+msgs.join(', '):'Cours actualisés');
 }
