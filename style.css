@@ -225,3 +225,8 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
 .gc-pill{position:fixed;left:max(8px,env(safe-area-inset-left));bottom:max(6px,env(safe-area-inset-bottom));z-index:5;display:inline-flex;align-items:center;gap:4px;padding:1px 8px;border-radius:999px;font:600 10.5px/18px system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;color:#94a3b8;background:#0b111bcc;border:1px solid #ffffff14;pointer-events:none;font-variant-numeric:tabular-nums;opacity:.75;-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px)}
 .gc-pill[hidden]{display:none}
 main{padding-bottom:calc(40px + env(safe-area-inset-bottom))}
+/* read-only view (?vue) */
+.ro-badge{position:fixed;right:max(8px,env(safe-area-inset-right));bottom:max(6px,env(safe-area-inset-bottom));z-index:5;padding:1px 8px;border-radius:999px;font:600 10.5px/18px system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;color:#94a3b8;background:#0b111bcc;border:1px solid #ffffff14;pointer-events:none;opacity:.8;-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px)}
+.ro-badge[hidden]{display:none}
+body.view #btnSettings,body.view #btnDemo,body.view #btnDemo2,body.view #btnClearDemo,body.view #empty,body.view .add,body.view .rec-btns,body.view .edit{display:none!important}
+body.view .ln{cursor:default}
