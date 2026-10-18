@@ -172,3 +172,52 @@ main{overflow-x:clip}
 .pt-main .tn{white-space:nowrap}
 .pt-main{max-width:100%;overflow-wrap:anywhere;text-wrap:balance}
 .tag.third{background:#a78bfa22;color:#c4b5fd}
+/* custom envelopes (settings) */
+.env-list{display:grid;gap:6px}
+.env-row{display:grid;grid-template-columns:10px minmax(0,1fr) auto auto auto;gap:8px;align-items:center}
+.env-mv{display:flex;gap:4px}
+.env-row .dot{width:10px;height:10px;border-radius:50%}
+.env-row input{background:#0b111b;border:1px solid var(--line);border-radius:10px;padding:8px 10px;color:var(--txt);width:100%;min-width:0}
+.env-type{font-size:11px;color:var(--mut);white-space:nowrap}
+.mini{width:34px;height:34px;border-radius:10px;border:1px solid var(--line);background:var(--card2);cursor:pointer}
+.mini:disabled{opacity:.35;cursor:default}
+.env-add{display:grid;grid-template-columns:minmax(0,1fr) auto auto;gap:6px}
+.env-add input,.env-add select{background:#0b111b;border:1px solid var(--line);border-radius:10px;padding:9px 10px;color:var(--txt);min-width:0}
+.env-add button{padding:9px 12px;border-radius:10px;cursor:pointer}
+/* recurring deposits */
+.rec-title{margin:0 0 10px;font-size:16px;font-weight:650}
+.rec-item{padding:12px;border-radius:12px;background:var(--card2);border:1px solid #34d39933;display:grid;gap:8px;margin-bottom:8px}
+.rec-item.paused{opacity:.7;border-color:#ffffff14}
+.rec-top{display:flex;justify-content:space-between;align-items:flex-start;gap:10px}
+.rec-main{min-width:0}
+.rec-amt{font-weight:750;font-size:17px;color:var(--pos)}
+.rec-sub{color:var(--mut);font-size:12.5px;overflow-wrap:anywhere}
+.rec-next{font-size:13px}
+.rec-btns{display:flex;flex-wrap:wrap;gap:6px}
+.rec-btns .b{padding:8px 11px;font-size:13px}
+.rec-hist summary{cursor:pointer;color:var(--acc2);font-size:13px}
+.rec-hist ul{list-style:none;margin:8px 0 0;padding:0;display:grid;gap:4px;font-size:12.5px;font-variant-numeric:tabular-nums}
+.rec-hist li{display:grid;grid-template-columns:auto auto minmax(0,1fr) auto;gap:8px;align-items:center}
+.rec-hist li span:nth-child(3){color:var(--mut);text-align:right;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.rec-hist li.undone{opacity:.5;text-decoration:line-through}
+.tag.rec{background:#34d39922;color:var(--acc)}
+.tag.rec.off{background:#64748b33;color:#94a3b8}
+@media (max-width:520px){.env-add{grid-template-columns:minmax(0,1fr) auto}.env-add input{grid-column:1/-1}.rec-btns .b{flex:1 1 auto;min-height:40px}}
+/* Safari / iOS */
+.top{-webkit-backdrop-filter:blur(12px)}
+dialog::backdrop{-webkit-backdrop-filter:blur(3px)}
+@supports (-webkit-touch-callout:none){input,select,textarea{font-size:16px!important}}
+html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
+.legend{grid-template-columns:minmax(0,1fr)}.legend li{min-width:0}
+/* envelope groups */
+.egrp>.sec-head .sec-title{font-size:17px}
+.grp-body{display:grid;gap:10px}
+.sub-sec{background:#0f1622;border:1px solid #ffffff0d;border-left:3px solid var(--c);border-radius:12px;padding:12px}
+.sub-sec .sec-title{font-size:15px}
+.sub-sec .sec-title .bar{display:none}
+.sub-sec .sec-tot .v{font-size:16px}
+.sub-sec .sec-body{margin-top:10px}
+.env-row{grid-template-columns:10px minmax(0,1fr) auto auto auto}
+.env-row .env-grp{grid-column:2/-1;font-size:13px;padding:6px 10px}
+@media (max-width:520px){.env-row{grid-template-columns:10px minmax(0,1fr) auto auto;row-gap:6px}.env-row .env-type{grid-column:3/-1;grid-row:2;text-align:center}.env-row .env-grp{grid-column:2;grid-row:2}.env-row .dot{grid-row:1}}
+@media (max-width:520px){.sub-sec{padding:10px 9px}.grp-body{gap:8px}.sub-sec .sec-tot .v{font-size:17px}}
