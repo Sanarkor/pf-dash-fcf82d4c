@@ -160,3 +160,11 @@ main{overflow-x:clip}
 .legend .lg-g.none{background:none}
 .legend .nm{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 @media (max-width:520px){.legend .pc{width:44px}.legend .lg-g{font-size:12.5px;min-width:74px}.legend .vl{min-width:84px}}
+/* uninvested cash line */
+.ln.cash{background:repeating-linear-gradient(135deg,#0f1722,#0f1722 8px,#111b28 8px,#111b28 16px);border:1px dashed #fbbf2455}
+.ln.cash:hover{border-color:#fbbf2499}
+.ln.cash .a{color:#fde68a;display:flex;align-items:center;gap:7px}
+.ln.cash .wal{font-size:15px;line-height:1;flex:0 0 auto}
+.cash-edit{border-color:#fbbf2466}
+.ln.cash .ct{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0}
+@media (max-width:520px){.ln.cash .a{white-space:normal}.ln.cash .ct{white-space:normal;line-height:1.25}}
