@@ -33,8 +33,11 @@ const LEGACY_SAV=[['savRev','',true],['savLbp','La Banque Postale',true],['spous
 function blank(secs){secs=cloneSecs(secs||DEF_SECTIONS);const b={v:3,demo:false,sections:secs,cash:{},recurring:[],recHistory:[],
   settings:{provider:'none',apiKey:'',masked:false,collapsed:{}},fx:{rates:{EUR:1},at:0,src:''},cryptoAt:0,stocksAt:0};
   for(const s of secs){b[s.k]=[];if(s.type!=='sav')b.cash[s.k]={amount:0,cur:'EUR'};}return b;}
+// ?vue = read-only view: data comes from the public data.json only, kept in memory, never written to localStorage
+const VIEW=new URLSearchParams(location.search).has('vue');
 let S=load();SECTIONS=S.sections;
 function load(){
+  if(VIEW)return blank();
   try{const raw=localStorage.getItem(KEY);if(!raw)return blank();return normalize(JSON.parse(raw));}catch(e){return blank();}
 }
 function normalize(d){
@@ -57,8 +60,9 @@ function normalize(d){
   b.updatedAt=+d.updatedAt||0;b.cloudAt=+d.cloudAt||0;
   return b;
 }
+function localTd(){try{const d=JSON.parse(localStorage.getItem(KEY)||'null');const st=d&&d.settings;return st&&st.provider==='twelvedata'&&String(st.apiKey||'').trim()?{provider:'twelvedata',apiKey:String(st.apiKey).trim()}:null;}catch(e){return null;}}
 function touch(){S.updatedAt=Date.now();}
-function save(){try{localStorage.setItem(KEY,JSON.stringify(S));}catch(e){toast('Impossible d\'enregistrer (stockage plein ou bloqué)');}}
+function save(){if(VIEW)return;try{localStorage.setItem(KEY,JSON.stringify(S));}catch(e){toast('Impossible d\'enregistrer (stockage plein ou bloqué)');}}
 function uid(){return Math.random().toString(36).slice(2,10)+Date.now().toString(36).slice(-4);}
 
 /* ---------- helpers ---------- */
@@ -201,13 +205,13 @@ function renderSection(sec,isSub){
   if(editing[sec.k]==='new')list.appendChild(editForm(sec,null));
   if(sec.type!=='sav')list.appendChild(editing[sec.k]==='cash'?cashForm(sec):cashRow(sec));
   body.appendChild(list);
-  if(editing[sec.k]!=='new')body.appendChild(el('button',{class:'add',onclick:()=>{editing[sec.k]='new';render();focusFirst(sec.k);}},'+ Ajouter '+(sec.type==='sav'?'un compte':sec.type==='cry'?'une crypto':'une ligne')));
+  if(!VIEW&&editing[sec.k]!=='new')body.appendChild(el('button',{class:'add',onclick:()=>{editing[sec.k]='new';render();focusFirst(sec.k);}},'+ Ajouter '+(sec.type==='sav'?'un compte':sec.type==='cry'?'une crypto':'une ligne')));
   card.appendChild(body);return card;
 }
 function cashRow(sec){
   const c=S.cash[sec.k]||(S.cash[sec.k]={amount:0,cur:'EUR'});const n=num(c.amount)||0;const v=cashVal(sec.k);const usd=c.cur==='USD';
-  const open=()=>{editing[sec.k]='cash';render();focusFirst(sec.k);};
-  return el('div',{class:'ln cash',tabindex:'0',role:'button',title:'Modifier les fonds disponibles',onclick:open,onkeydown:e=>{if(e.key==='Enter')open();}},
+  const open=()=>{if(VIEW)return;editing[sec.k]='cash';render();focusFirst(sec.k);};
+  return el('div',{class:'ln cash',tabindex:VIEW?null:'0',role:VIEW?null:'button',title:VIEW?null:'Modifier les fonds disponibles',onclick:open,onkeydown:e=>{if(e.key==='Enter')open();}},
     el('div',{class:'a'},el('span',{class:'wal','aria-hidden':'true'},'👛'),el('span',{class:'ct'},'Fonds disponibles non investis')),
     el('div',{class:'r'},el('div',{class:'v amt',text:eur(v)})),
     el('div',{class:'b amt',text:(usd?money(n,'USD')+' · ':'')+'Liquidités · hors plus/moins-value'}),
@@ -250,9 +254,9 @@ function lineRow(sec,l){
     else tags.push(el('span',{class:'tag off',text:'manuel'}));
     if(v.fxMissing)tags.push(el('span',{class:'tag',text:'change ?'}));
   }
-  return el('div',{class:'ln'+(sec.type==='sav'&&l.inTotal===false?' off':''),tabindex:'0',role:'button',onclick:()=>{editing[sec.k]=l.id;render();focusFirst(sec.k);},onkeydown:e=>{if(e.key==='Enter'){editing[sec.k]=l.id;render();focusFirst(sec.k);}}},
-    el('div',{class:'a'},sec.type==='sav'?el('input',{type:'checkbox',class:'tot-cb',title:'Compte dans le total','aria-label':'Compte dans le total',checked:l.inTotal!==false,
-      onclick:e=>{e.stopPropagation();l.inTotal=e.target.checked;touch();save();render();},onkeydown:e=>e.stopPropagation()}):null,a,...tags),
+  return el('div',{class:'ln'+(sec.type==='sav'&&l.inTotal===false?' off':''),tabindex:VIEW?null:'0',role:VIEW?null:'button',onclick:VIEW?null:()=>{editing[sec.k]=l.id;render();focusFirst(sec.k);},onkeydown:VIEW?null:e=>{if(e.key==='Enter'){editing[sec.k]=l.id;render();focusFirst(sec.k);}}},
+    el('div',{class:'a'},sec.type==='sav'?el('input',{type:'checkbox',class:'tot-cb',title:'Compte dans le total','aria-label':'Compte dans le total',checked:l.inTotal!==false,disabled:VIEW,
+      onclick:e=>{e.stopPropagation();if(VIEW){e.preventDefault();return;}l.inTotal=e.target.checked;touch();save();render();},onkeydown:e=>e.stopPropagation()}):null,a,...tags),
     el('div',{class:'r'},el('div',{class:'v amt',text:eur(v.value)})),
     el('div',{class:'b amt',text:b}),
     el('div',{class:'r'},isFinite(v.pnl)?el('div',{class:'p amt '+cls(v.pnl),text:signed(v.pnl)+(v.cost>0?' '+pct(v.pnl/v.cost*100):'')}):el('div',{class:'p',text:''})));
@@ -655,6 +659,7 @@ function recForm(r){
 }
 function renderRecurring(){
   const box=$('#recBody');if(!box)return;box.textContent='';
+  if(VIEW){const c=$('#recCard');if(c)c.classList.toggle('hidden',!S.recurring.length);}
   for(const r of S.recurring){
     if(recEdit.id===r.id){box.appendChild(recForm(r));continue;}
     const x=findLine(r);const hs=S.recHistory.filter(h=>h.ruleId===r.id).sort((a,b)=>a.date<b.date?1:a.date>b.date?-1:b.at-a.at);
@@ -671,8 +676,9 @@ function renderRecurring(){
     const hist=el('details',{class:'rec-hist'},el('summary',null,'Historique ('+live.length+')'),
       hs.length?el('ul',null,...hs.slice(0,24).map(h=>el('li',{class:h.undone?'undone':''},el('span',{text:frDate(h.date)}),el('span',{class:'amt',text:eur(h.amount)}),
         el('span',{class:'amt',text:qtyf(h.units)+' × '+money(h.price,h.cur)}),h.undone?el('span',{class:'tag off',text:'annulé'}):null))):el('p',{class:'hint',text:'Aucun versement appliqué pour l\'instant.'}));
-    box.appendChild(el('div',{class:'rec-item'+(r.active?'':' paused')},head,nxt,btns,hist));
+    box.appendChild(el('div',{class:'rec-item'+(r.active?'':' paused')},head,nxt,VIEW?null:btns,hist));
   }
+  if(VIEW)return;
   if(recEdit.id==='new')box.appendChild(recForm(null));
   else box.appendChild(el('button',{class:'add',onclick:()=>{recEdit.id='new';render();}},'+ Ajouter un versement programmé'));
 }
@@ -699,10 +705,20 @@ const loadDemo=async()=>{const has=SECTIONS.some(s=>S[s.k].length)&&!S.demo;if(d
 $('#btnDemo').onclick=loadDemo;$('#btnDemo2').onclick=loadDemo;
 $('#btnReset').onclick=async()=>{closeDlg();if(!await ask('Effacer toutes les données de ce navigateur ?',{ok:'Tout effacer',danger:1}))return;const st=S.settings;S=blank();SECTIONS=S.sections;S.settings.provider=st.provider;S.settings.apiKey=st.apiKey;save();render();toast('Données effacées');};
 $('#btnClearDemo').onclick=()=>{const st=S.settings;S=blank();SECTIONS=S.sections;S.settings.provider=st.provider;S.settings.apiKey=st.apiKey;save();render();};
+if(VIEW){document.body.classList.add('view');const rb=$('#roBadge');if(rb)rb.hidden=false;
+  for(const id of ['btnSettings','btnDemo','btnDemo2','btnClearDemo','btnReset','btnCloudSave','btnCloudLoad','btnImport','btnExport','btnPaste','btnEnvAdd']){const b=document.getElementById(id);if(b){b.onclick=null;b.disabled=true;}}
+  render();
+  fetchRemote(false).then(d=>{if(!d){toast('Données en ligne indisponibles',5000);return;}
+    S=normalize(d);SECTIONS=S.sections;S.settings.collapsed={};S.settings.masked=false;
+    const td=localTd();if(td)Object.assign(S.settings,td);else{S.settings.provider='none';S.settings.apiKey='';}
+    S.cloudAt=S.updatedAt;render();refreshAll(false);});
+  setInterval(()=>{if(!document.hidden)refreshAll(false);},5*60e3);
+}else{
 render();hashImport();syncFromRemote().finally(async()=>{await refreshAll(false);applyRecurring();});
 window.addEventListener('hashchange',hashImport);
 window.addEventListener('pageshow',hashImport);
 window.addEventListener('focus',hashImport);
 setInterval(()=>{if(!document.hidden){refreshAll(false).then(applyRecurring);}},5*60e3);
+}
 document.addEventListener('visibilitychange',()=>{if(!document.hidden&&Date.now()-S.cryptoAt>5*60e3)refreshAll(false);});
 })();
