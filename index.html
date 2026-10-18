@@ -7,13 +7,13 @@
 <meta name="referrer" content="no-referrer">
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; connect-src https://api.coingecko.com https://api.frankfurter.dev https://open.er-api.com https://api.twelvedata.com https://www.alphavantage.co https://api.onvista.de; base-uri 'none'; form-action 'none'; object-src 'none'">
 <meta name="theme-color" content="#0b0f17">
-<title>Dashboard</title>
+<title>Patrimoine de Clebardo</title>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%230b0f17'/%3E%3Cpath d='M7 22l6-7 5 4 7-9' stroke='%2334d399' stroke-width='3' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
-<link rel="stylesheet" href="style.css?v=5">
+<link rel="stylesheet" href="style.css?v=6">
 </head>
 <body>
 <header class="top">
-  <div class="brand"><span class="logo" aria-hidden="true"></span><span>Patrimoine</span></div>
+  <div class="brand"><span class="logo" aria-hidden="true"></span><span class="brand-sm">Clebardo</span></div>
   <div class="actions">
     <button id="btnMask" class="icon" title="Masquer / afficher les montants" aria-label="Masquer les montants">◐</button>
     <button id="btnRefresh" class="icon" title="Actualiser les cours" aria-label="Actualiser">↻</button>
@@ -24,6 +24,7 @@
 <div id="demoBanner" class="banner hidden">Mode <b>Démo</b> : valeurs fictives. <button id="btnClearDemo" class="link">Effacer la démo</button></div>
 
 <main>
+  <h1 class="page-title"><span class="pt-kicker">Tableau de bord</span><span class="pt-main">Patrimoine de <em>Clebardo</em></span></h1>
   <section class="hero card">
     <div class="label">Valeur totale</div>
     <div id="total" class="total amt">0,00 €</div>
@@ -78,6 +79,6 @@
 </dialog>
 
 <div id="toast" class="toast" role="status" aria-live="polite"></div>
-<script src="app.js?v=5"></script>
+<script src="app.js?v=6"></script>
 </body>
 </html>
