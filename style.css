@@ -154,3 +154,8 @@ main{overflow-x:clip}
   .sig{font-size:11px;gap:5px;padding:2px 9px 2px 2px}
 }
 @media (max-width:365px){.sig{font-size:10px;letter-spacing:0}.icon{width:38px;height:38px}}
+/* legend gain pill */
+.legend .lg-g{flex:0 0 auto;font-size:12px;line-height:17px;padding:1px 6px;min-width:76px;text-align:center}
+.legend .lg-g.none{background:none}
+.legend .nm{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+@media (max-width:520px){.legend .pc{width:44px}.legend .lg-g{font-size:12.5px;min-width:74px}.legend .vl{min-width:84px}}
