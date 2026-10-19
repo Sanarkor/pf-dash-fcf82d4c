@@ -144,7 +144,8 @@ function render(){
     parts.push({sec:u.kind==='grp'?{name:u.name,color:u.color,type:'grp'}:u.sec,v:v.value,pnl:v.pnl,cost:v.cost});}
   $('#total').textContent=eur(total);
   const tpEl=$('#totalPnl');tpEl.className='pnl amt '+(hp?cls(tp):'mut');
-  tpEl.textContent=hp?('Plus/moins-value latente : '+signed(tp)+(tc>0?'  ('+pct(tp/tc*100)+')':'')):'Plus/moins-value : renseigne PRU et cours';
+  tpEl.textContent='';if(hp)tpEl.append(el('span',{class:'pnl-lbl',text:'Plus/moins-value latente'}),el('span',{class:'pnl-val'},el('b',{text:signed(tp)}),tc>0?el('b',{class:'pnl-pc',text:'('+pct(tp/tc*100)+')'}):null));
+  else tpEl.textContent='Plus/moins-value : renseigne PRU et cours';
   const st=[];st.push('Crypto : '+ago(S.cryptoAt));st.push('Change : '+(S.fx.at?ago(S.fx.at):'—'));
   st.push('Actions : '+(busy?'actualisation…'+(S.stocksAt?' (cache '+qtime(S.stocksAt)+')':''):(S.stocksAt?ago(S.stocksAt):'manuel')));
   if(S.cloudAt)st.push(S.updatedAt>S.cloudAt?'En ligne : modifs à sauvegarder':'En ligne : à jour');$('#status').textContent=st.join(' · ');

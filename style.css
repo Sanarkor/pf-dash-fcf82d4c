@@ -328,3 +328,9 @@ html,body{font-family:"Inter var",Inter,-apple-system,BlinkMacSystemFont,"SF Pro
 .delay-note{margin-top:6px;color:var(--mut);font-size:10.5px;line-height:1.4;font-weight:300;letter-spacing:.1px;opacity:.85}
 [data-theme=light] .delay-note{font-weight:400;opacity:.9}
 @media (max-width:520px){.delay-note{font-size:10.5px}}
+/* global +/- value on its own line */
+.pnl .pnl-lbl{display:block;font-size:12px;font-weight:400;opacity:.85;letter-spacing:.1px}
+.pnl .pnl-val{display:flex;flex-wrap:wrap;align-items:baseline;gap:2px 8px;margin-top:1px}
+.pnl .pnl-val b{font-size:19px;font-weight:650;letter-spacing:-.3px;font-variant-numeric:tabular-nums}
+.pnl .pnl-val .pnl-pc{font-size:16px;font-weight:600}
+@media (max-width:520px){.pnl .pnl-val b{font-size:18px}.pnl .pnl-val .pnl-pc{font-size:15px}}
