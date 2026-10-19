@@ -334,3 +334,14 @@ html,body{font-family:"Inter var",Inter,-apple-system,BlinkMacSystemFont,"SF Pro
 .pnl .pnl-val b{font-size:19px;font-weight:650;letter-spacing:-.3px;font-variant-numeric:tabular-nums}
 .pnl .pnl-val .pnl-pc{font-size:16px;font-weight:600}
 @media (max-width:520px){.pnl .pnl-val b{font-size:18px}.pnl .pnl-val .pnl-pc{font-size:15px}}
+/* total value: bigger, bold, animated blue-green "magic" glow (same gradient family as the name in the title) */
+:root{--tg1:#34d399;--tg2:#60a5fa;--tgA:#34d39966;--tgB:#60a5fa66;--tgA2:#34d39926;--tgB2:#60a5fa2e}
+:root[data-theme=light]{--tg1:#059669;--tg2:#2563eb;--tgA:#10b98140;--tgB:#3b82f640;--tgA2:#10b9811a;--tgB2:#3b82f61f}
+.total{display:inline-block;font-size:clamp(36px,10.5vw,52px);font-weight:600;letter-spacing:-1.2px;line-height:1.12;padding:0 2px;
+  background:linear-gradient(100deg,var(--tg1) 0%,var(--tg2) 50%,var(--tg1) 100%);background-size:200% 100%;
+  -webkit-background-clip:text;background-clip:text;color:transparent;-webkit-text-fill-color:transparent;
+  animation:totShift 6s ease-in-out infinite alternate,totGlow 3.2s ease-in-out infinite alternate}
+@keyframes totShift{from{background-position:0% 50%}to{background-position:100% 50%}}
+@keyframes totGlow{from{filter:drop-shadow(0 0 5px var(--tgA)) drop-shadow(0 0 16px var(--tgA2))}to{filter:drop-shadow(0 0 5px var(--tgB)) drop-shadow(0 0 18px var(--tgB2))}}
+@media (prefers-reduced-motion:reduce){.total{animation:none;background-position:50% 50%;filter:drop-shadow(0 0 6px var(--tgA))}}
+body.masked .total{animation:none;filter:blur(9px)}
