@@ -2,7 +2,7 @@
 (function(){
 const KEY='pfdash.v1'; // keep this prefix distinct from other pages on the same origin
 const TOKEN_KEY='pfdash.ghtoken'; // GitHub token: localStorage only, never inside the data
-const REPO='Sanarkor/mon-patrimoine-kouakou',REPO_NAME=REPO.split('/')[1],BRANCHES=['main','gh-pages'],DATA_PATH='data.json';
+const REPO='Sanarkor/san-wealth',REPO_NAME=REPO.split('/')[1],BRANCHES=['main','gh-pages'],DATA_PATH='data.json';
 const DEF_SECTIONS=[
   {k:'pea',   name:'PEA',                 type:'sec', color:'#34d399'},
   {k:'cto',   name:'CTO',                 type:'sec', color:'#60a5fa'},
