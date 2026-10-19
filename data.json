@@ -54,11 +54,11 @@
    "EUR": 1,
    "USD": 0.888651915044877
   },
-  "at": 1792400059738,
+  "at": 1792410725544,
   "src": "frankfurter (2026-10-16)"
  },
- "cryptoAt": 1792400059892,
- "stocksAt": 1792400059702,
+ "cryptoAt": 1792410725544,
+ "stocksAt": 1792410725506,
  "pea": [
   {
    "id": "cb68oojb5zg3",
@@ -68,17 +68,17 @@
    "pru": 53.483,
    "cur": "EUR",
    "apiSym": "",
-   "price": 41.095,
+   "price": 41.315,
    "isin": "NL0000226223",
    "mkt": "_PAR",
    "src": "auto",
    "ovType": "STOCK",
-   "chg": -0.182171,
-   "priceAt": 1792400059915,
+   "chg": 0.352198,
+   "priceAt": 1792410725544,
    "priceSrc": "auto",
    "via": "onvista Paris",
    "autoFail": false,
-   "quoteAt": 1792399150037
+   "quoteAt": 1792409803599
   },
   {
    "id": "82jysi2r36hu",
@@ -88,17 +88,17 @@
    "pru": 6.083,
    "cur": "EUR",
    "apiSym": "",
-   "price": 6.335,
+   "price": 6.317,
    "isin": "FR001400U5Q4",
    "mkt": "_PAR",
    "src": "auto",
    "ovType": "FUND",
-   "chg": 0.015788,
-   "priceAt": 1792400059924,
+   "chg": -0.268393,
+   "priceAt": 1792410725544,
    "priceSrc": "auto",
    "via": "onvista Paris",
    "autoFail": false,
-   "quoteAt": 1792399151979
+   "quoteAt": 1792409818082
   },
   {
    "id": "e34mnh3cgjd7",
@@ -108,17 +108,17 @@
    "pru": 39.696,
    "cur": "EUR",
    "apiSym": "",
-   "price": 38.08,
+   "price": 38,
    "isin": "FR0013412012",
    "mkt": "_PAR",
    "src": "auto",
    "ovType": "FUND",
-   "chg": 0.860813,
-   "priceAt": 1792400059920,
+   "chg": 0.648921,
+   "priceAt": 1792410725544,
    "priceSrc": "auto",
    "via": "onvista Paris",
    "autoFail": false,
-   "quoteAt": 1792399021012
+   "quoteAt": 1792409743747
   },
   {
    "id": "hqha0ld2otsa",
@@ -128,17 +128,17 @@
    "pru": 677.56,
    "cur": "EUR",
    "apiSym": "",
-   "price": 709.75,
+   "price": 707.61,
    "isin": "LU1681043599",
    "mkt": "_PAR",
    "src": "auto",
    "ovType": "FUND",
-   "chg": 0.028187,
-   "priceAt": 1792400059916,
+   "chg": -0.273413,
+   "priceAt": 1792410725544,
    "priceSrc": "auto",
    "via": "onvista Paris",
    "autoFail": false,
-   "quoteAt": 1792399143192
+   "quoteAt": 1792409772917
   },
   {
    "id": "qlqcpdfr69nf",
@@ -148,17 +148,17 @@
    "pru": 105.028,
    "cur": "EUR",
    "apiSym": "",
-   "price": 105.72,
+   "price": 105.38,
    "isin": "FR0011871110",
    "mkt": "_PAR",
    "src": "auto",
    "ovType": "FUND",
-   "chg": 0.360737,
-   "priceAt": 1792400059918,
+   "chg": 0.037972,
+   "priceAt": 1792410725549,
    "priceSrc": "auto",
    "via": "onvista Paris",
    "autoFail": false,
-   "quoteAt": 1792399154983
+   "quoteAt": 1792409794764
   }
  ],
  "cto": [
@@ -176,7 +176,7 @@
    "src": "auto",
    "ovType": "STOCK",
    "chg": -8.9374,
-   "priceAt": 1792400024870,
+   "priceAt": 1792410722626,
    "priceSrc": "auto",
    "via": "Twelve Data",
    "autoFail": false,
@@ -196,7 +196,7 @@
    "src": "auto",
    "ovType": "STOCK",
    "chg": -1.7427,
-   "priceAt": 1792400059702,
+   "priceAt": 1792410100076,
    "priceSrc": "auto",
    "via": "Twelve Data",
    "autoFail": false,
@@ -246,7 +246,7 @@
    "rate": null,
    "note": "",
    "capped": false,
-   "inTotal": false,
+   "inTotal": true,
    "third": true,
    "holder": "San Wife"
   },
@@ -282,8 +282,8 @@
    "qty": 0.02726735,
    "pru": 64706.2,
    "cgId": "bitcoin",
-   "price": 73800,
-   "priceAt": 1792400059892,
+   "price": 73270,
+   "priceAt": 1792410725544,
    "priceSrc": "auto"
   },
   {
@@ -292,8 +292,8 @@
    "qty": 0.34031479,
    "pru": 1825.78,
    "cgId": "ethereum",
-   "price": 2169.7,
-   "priceAt": 1792400059892,
+   "price": 2153.86,
+   "priceAt": 1792410725544,
    "priceSrc": "auto"
   },
   {
@@ -302,8 +302,8 @@
    "qty": 2139.8918,
    "pru": 0.07773,
    "cgId": "dogecoin",
-   "price": 0.071124,
-   "priceAt": 1792400059892,
+   "price": 0.070405,
+   "priceAt": 1792410725544,
    "priceSrc": "auto"
   },
   {
@@ -312,8 +312,8 @@
    "qty": 1.746454,
    "pru": 80.73,
    "cgId": "solana",
-   "price": 94.2,
-   "priceAt": 1792400059892,
+   "price": 93.2,
+   "priceAt": 1792410725544,
    "priceSrc": "auto"
   },
   {
@@ -322,8 +322,8 @@
    "qty": 0.96654671,
    "pru": 64.69,
    "cgId": "hyperliquid",
-   "price": 71.28,
-   "priceAt": 1792400059892,
+   "price": 70.31,
+   "priceAt": 1792410725544,
    "priceSrc": "auto"
   },
   {
@@ -332,8 +332,8 @@
    "qty": 16.21168,
    "pru": 2.1253,
    "cgId": "layerzero",
-   "price": 1.68,
-   "priceAt": 1792400059892,
+   "price": 1.64,
+   "priceAt": 1792410725544,
    "priceSrc": "auto",
    "chg": null
   },
@@ -343,8 +343,8 @@
    "qty": 8.76254219,
    "pru": 1.3694,
    "cgId": "the-open-network",
-   "price": 1.2,
-   "priceAt": 1792400059892,
+   "price": 1.19,
+   "priceAt": 1792410725544,
    "priceSrc": "auto"
   },
   {
@@ -353,12 +353,12 @@
    "qty": 209970,
    "pru": 0.0000413665,
    "cgId": "dogs-2",
-   "price": 0.00003416,
-   "priceAt": 1792400059892,
+   "price": 0.00003351,
+   "priceAt": 1792410725544,
    "priceSrc": "auto"
   }
  ],
- "updatedAt": 1792400074014,
+ "updatedAt": 1792410745772,
  "app": "pf-dash",
- "savedAt": "2026-10-19T08:54:34.014Z"
+ "savedAt": "2026-10-19T11:52:25.772Z"
 }
